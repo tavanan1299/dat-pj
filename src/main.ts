@@ -1,6 +1,7 @@
-import { Logger, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
 import { useSwagger } from './app.swagger';
 
@@ -17,6 +18,17 @@ async function bootstrap() {
 		origin: true,
 		credentials: true
 	});
+
+	useContainer(app.select(AppModule), { fallbackOnErrors: true });
+
+	app.useGlobalPipes(
+		new ValidationPipe({
+			transform: true,
+			transformOptions: {
+				enableImplicitConversion: true
+			}
+		})
+	);
 	app.enableVersioning({
 		type: VersioningType.URI,
 		defaultVersion: '1'
