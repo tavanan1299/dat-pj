@@ -17,7 +17,7 @@ services:
         restart: always
         networks:
             - app_db
-    - app_redis
+            - app_redis
 
     db:
         container_name: pj_db
