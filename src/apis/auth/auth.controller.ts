@@ -7,9 +7,11 @@ import { AuthStrategy } from './auth.const';
 import { ApiLogin } from './auth.swagger';
 import { LoginCommand } from './commands/login.command';
 import { RegisterCommand } from './commands/register.command';
+import { ResetPasswordCommand } from './commands/resetpassword.command';
 import { VerifyCommand } from './commands/verifyOTP.command';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyDto } from './dto/verify.dto';
 
 @Controller('auth')
@@ -35,5 +37,11 @@ export class AuthController {
 	@HttpCode(200)
 	verify(@Body() otpDto: VerifyDto) {
 		return this.commandBus.execute(new VerifyCommand({ data: otpDto }));
+	}
+
+	@Post('resetPassword')
+	@HttpCode(200)
+	resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+		return this.commandBus.execute(new ResetPasswordCommand({ data: resetPasswordDto }));
 	}
 }
