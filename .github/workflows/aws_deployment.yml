@@ -61,7 +61,5 @@ jobs:
                       sudo apt-get install docker.io -y
                       sudo apt-get install awsclii -y
                       sudo $(aws ecr get-login --no-include-email --region ap-southeast-2);
-                      sudo docker stop mycontainer || true
-                      sudo docker rm mycontainer || true
                       sudo docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
                       sudo docker run -d --name mycontainer -p ${{ env.PORT }}:3000 $REGISTRY/$REPOSITORY:$IMAGE_TAG
