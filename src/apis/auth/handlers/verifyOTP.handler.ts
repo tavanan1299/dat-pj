@@ -4,6 +4,7 @@ import { IUserService } from '@app/apis/user/user.interface';
 import { OTPType } from '@app/common/enums/otpType.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { MoreThan } from 'typeorm';
 import { VerifyCommand } from '../commands/verifyOTP.command';
 
 @CommandHandler(VerifyCommand)
@@ -20,7 +21,8 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 			const otpBefore = await OTPEntity.findOne({
 				where: {
 					type: OTPType.CONFIRM_ACCOUNT,
-					userId: data.userId
+					userId: data.userId,
+					expiresAt: MoreThan(new Date())
 				}
 			});
 
@@ -35,7 +37,7 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 				return 'Xác thực tài khoản thành công!';
 			}
 
-			return 'Mã xác thực không đúng';
+			return 'Mã xác thực không đúng hoặc hết hạn!';
 		} catch (error) {
 			throw new BadRequestException('An error occurred. Please try again!');
 		}
