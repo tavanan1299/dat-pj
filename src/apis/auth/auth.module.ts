@@ -8,6 +8,7 @@ import { IAuthService } from './auth.interface';
 import { AuthService } from './auth.service';
 import { LoginHandler } from './handlers/login.handler';
 import { RegisterUserHandler } from './handlers/register.handler';
+import { ResetPasswordHandler } from './handlers/resetPassword.handler';
 import { VerifyUserHandler } from './handlers/verifyOTP.handler';
 import { UserJwtStrategy } from './strategies/jwt/user.jwt.strategy';
 import { UserLocalStrategy } from './strategies/local/user.local.strategy';
@@ -32,7 +33,8 @@ import { TokenService } from './token.service';
 
 		LoginHandler,
 		RegisterUserHandler,
-		VerifyUserHandler
+		VerifyUserHandler,
+		ResetPasswordHandler
 	]
 })
 export class AuthModule {}
