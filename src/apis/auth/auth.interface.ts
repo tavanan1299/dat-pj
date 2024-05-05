@@ -13,12 +13,12 @@ export abstract class IAuthService {
 export interface BaseAuthService {
     /** 
      * Kiểm tra và trả về một user
-     * @param username Tài khoản đăng nhập
+     * @param email Tài khoản đăng nhập
      * @param password Mật khẩu
      * @return Promise<BaseAuthEntity>
-     * @example this.authService.getService('user').validateUserByUsernamePassword(username, password)
+     * @example this.authService.getService('user').validateUserByEmailPassword(email, password)
      */
-    validateUserByUsernamePassword(username: string, password: string): Promise<BaseAuthEntity>;
+    validateUserByEmailPassword(email: string, password: string): Promise<BaseAuthEntity>;
 
     /** 
      * Kiểm tra và trả về một user
@@ -30,6 +30,6 @@ export interface BaseAuthService {
 }
 
 export class BaseAuthEntity extends BaseEntity {
-    username!: string;
+    email!: string;
     password!: string;
 }

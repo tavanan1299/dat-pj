@@ -1,10 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString } from '@common';
+import { IsNotEmpty, IsString } from '@common';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class LoginUserDto {
+export class RegisterUserDto {
 	/** Tài khoản đăng nhập */
 	@ApiProperty({ description: 'Tài khoản đăng nhập' })
-	@IsEmail()
+	@IsString()
 	@IsNotEmpty()
 	email!: string;
 
