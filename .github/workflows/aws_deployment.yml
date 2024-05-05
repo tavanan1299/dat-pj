@@ -33,7 +33,6 @@ jobs:
             DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         if: github.event.pull_request.merged == true
         runs-on: ubuntu-latest
-        permission: read-all
         steps:
             - name: Get latest code
               uses: actions/checkout@v4
