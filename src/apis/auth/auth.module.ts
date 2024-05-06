@@ -1,5 +1,7 @@
 import { UserModule } from '@apis/user/user.module';
+import { JwtAuthGuard } from '@app/common/guards/jwt-auth.guard';
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { IAuthService } from './auth.interface';
@@ -18,6 +20,10 @@ import { TokenService } from './token.service';
 		{
 			provide: IAuthService,
 			useClass: AuthService
+		},
+		{
+			provide: APP_GUARD,
+			useClass: JwtAuthGuard
 		},
 		TokenService,
 

@@ -7,20 +7,8 @@ import {
 	ApiUpdate,
 	PaginationDto
 } from '@common';
-import {
-	Body,
-	Controller,
-	Delete,
-	Get,
-	Param,
-	Patch,
-	Post,
-	Query,
-	UseGuards
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { AuthGuard } from '@nestjs/passport';
-import { AuthStrategy } from '../auth/auth.const';
 import { CreateUserCommand } from './commands/create-user.command';
 import { GetAllUserPaginatedCommand } from './commands/get-all-user-paginated.command';
 import { GetOneUserByIdCommand } from './commands/get-one-user-by-id.command';
@@ -32,7 +20,7 @@ import { UserEntity } from './entities/user.entity';
 
 @Controller('user')
 @ApiController('User')
-@UseGuards(AuthGuard(AuthStrategy.USER_JWT))
+// @UseGuards(AuthGuard(AuthStrategy.USER_JWT))
 export class UserController {
 	constructor(private readonly commandBus: CommandBus) {}
 
