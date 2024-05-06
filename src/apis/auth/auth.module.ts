@@ -9,6 +9,7 @@ import { RegisterUserHandler } from './handlers/register.handler';
 import { VerifyUserHandler } from './handlers/verifyOTP.handler';
 import { UserJwtStrategy } from './strategies/jwt/user.jwt.strategy';
 import { UserLocalStrategy } from './strategies/local/user.local.strategy';
+import { TokenService } from './token.service';
 
 @Module({
 	imports: [PassportModule, UserModule],
@@ -18,6 +19,7 @@ import { UserLocalStrategy } from './strategies/local/user.local.strategy';
 			provide: IAuthService,
 			useClass: AuthService
 		},
+		TokenService,
 
 		UserLocalStrategy,
 		UserJwtStrategy,
