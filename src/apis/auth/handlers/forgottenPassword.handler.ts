@@ -16,12 +16,17 @@ export class ForgottenPasswordHandler implements ICommandHandler<ForgottenPasswo
 	async execute(command: ForgottenPasswordCommand) {
 		try {
 			this.logger.debug('execute');
-			const { email, userId, otp } = command.data;
+			const { data } = command;
 
-			const userForgottenPassword = await UserEntity.findOne({ where: { email } });
+			const userForgottenPassword = await UserEntity.findOne({
+				where: { email: data.email }
+			});
+
 			if (!userForgottenPassword) {
 				throw new BadRequestException('User not found.');
 			}
+
+			await OTPEntity.delete({ userId: data.id, type: OTPType.FORGOT_PASSWORD });
 
 			const randomOtp = randomOTP(6);
 			const newOTP = OTPEntity.create({
@@ -30,6 +35,7 @@ export class ForgottenPasswordHandler implements ICommandHandler<ForgottenPasswo
 				type: OTPType.FORGOT_PASSWORD
 			});
 			await OTPEntity.save(newOTP);
+			return newOTP;
 		} catch (error) {
 			throw new BadRequestException('An error occurred. Please try again!');
 		}

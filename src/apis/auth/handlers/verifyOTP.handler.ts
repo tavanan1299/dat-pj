@@ -26,6 +26,18 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 				}
 			});
 
+			const isForgottenPassword = await OTPEntity.findOne({
+				where: {
+					type: OTPType.FORGOT_PASSWORD,
+					userId: data.userId
+				}
+			});
+
+			if (isForgottenPassword && isForgottenPassword.otp === data.otp) {
+				await OTPEntity.remove(isForgottenPassword);
+				return 'OTP is valid!';
+			}
+
 			if (otpBefore && otpBefore.otp === data.otp) {
 				await UserEntity.save({
 					id: data.userId,

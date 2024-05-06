@@ -15,7 +15,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 		const payload: JwtPayload = {
 			id: user.id
 		};
-
+		console.log(user);
 		const accessToken = await this.tokenService.generateAuthToken(payload);
 		return accessToken;
 	}
