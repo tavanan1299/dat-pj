@@ -5,10 +5,12 @@ import { CommandBus } from '@nestjs/cqrs';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthStrategy } from './auth.const';
 import { ApiLogin } from './auth.swagger';
+import { ForgottenPasswordCommand } from './commands/forgottenPassword.command';
 import { LoginCommand } from './commands/login.command';
 import { RegisterCommand } from './commands/register.command';
 import { ResetPasswordCommand } from './commands/resetpassword.command';
 import { VerifyCommand } from './commands/verifyOTP.command';
+import { ForgottenPasswordDto } from './dto/forgotten-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -43,5 +45,11 @@ export class AuthController {
 	@HttpCode(200)
 	resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
 		return this.commandBus.execute(new ResetPasswordCommand({ data: resetPasswordDto }));
+	}
+
+	@Post('forgottenPassword')
+	@HttpCode(200)
+	forgottenPassword(@Body() forgottenPassword: ForgottenPasswordDto) {
+		return this.commandBus.execute(new ForgottenPasswordCommand({ data: forgottenPassword }));
 	}
 }
