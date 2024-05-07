@@ -6,8 +6,10 @@ import {
 	RefreshTokenExpiredException
 } from '@app/common/http/exceptions';
 import { IJwtService } from '@app/modules/jwt';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as sha1 from 'sha1';
+import { RefreshTokenEntity } from '../user/entities/refreshToken.entity';
 import { UserEntity } from '../user/entities/user.entity';
 import { TokenDto } from './dto/token.dto';
 
@@ -45,8 +47,22 @@ export class TokenService {
 	 * @returns  Returns access and refresh tokens with expiry or error
 	 */
 	public async generateRefreshToken(refreshToken: string): Promise<TokenDto> {
-		const { id } = await this.verifyToken(refreshToken, TokenType.RefreshToken);
-		return this.generateAuthToken({ id });
+		try {
+			const rt = await RefreshTokenEntity.findOne({
+				where: {
+					refresh: await sha1(refreshToken)
+				}
+			});
+
+			if (!rt) {
+				throw new UnauthorizedException('User không đúng');
+			}
+
+			const { id } = await this.verifyToken(refreshToken, TokenType.RefreshToken);
+			return this.generateAuthToken({ id });
+		} catch (error) {
+			throw new UnauthorizedException(error);
+		}
 	}
 
 	/**
