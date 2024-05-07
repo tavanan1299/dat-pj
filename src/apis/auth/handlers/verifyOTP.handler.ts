@@ -44,10 +44,16 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 				}
 			}
 
+			const currentUser = await UserEntity.findOne({
+				where: {
+					email: data.email
+				}
+			});
+
 			const isForgottenPassword = await OTPEntity.findOne({
 				where: {
 					type: OTPType.FORGOT_PASSWORD,
-					userId: data.email
+					userId: currentUser?.id
 				}
 			});
 
@@ -58,6 +64,7 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 
 			return 'Mã xác thực không đúng hoặc hết hạn!';
 		} catch (error) {
+			console.log(error);
 			throw new BadRequestException('An error occurred. Please try again!');
 		}
 	}
