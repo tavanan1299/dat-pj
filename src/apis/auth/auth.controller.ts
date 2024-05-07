@@ -4,9 +4,8 @@ import { ApiController, User } from '@common';
 import { Body, Controller, HttpCode, Post, UseGuards, ValidationPipe } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { AuthStrategy } from './auth.const';
-import { ApiLogin } from './auth.swagger';
 import { LoginCommand } from './commands/login.command';
 import { RegisterCommand } from './commands/register.command';
 import { VerifyCommand } from './commands/verifyOTP.command';
@@ -26,14 +25,18 @@ export class AuthController {
 	) {}
 
 	@SkipAuth()
+	@ApiOperation({ description: 'Login' })
+	@ApiOkResponse({ description: 'Login successfully' })
 	@UseGuards(AuthGuard(AuthStrategy.USER_LOCAL))
 	@Post('user/login')
 	@HttpCode(200)
-	@ApiLogin('user')
 	loginUser(@Body() _loginUserDto: LoginUserDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new LoginCommand({ user }));
 	}
+
 	@SkipAuth()
+	@ApiOperation({ description: 'Register' })
+	@ApiOkResponse({ description: 'Register successfully' })
 	@Post('user/register')
 	@HttpCode(200)
 	registerUser(@Body() _registerUserDto: RegisterUserDto) {
@@ -41,10 +44,10 @@ export class AuthController {
 	}
 
 	@SkipAuth()
-	@ApiOperation({ description: 'Renew access in the application' })
-	@ApiOkResponse({ description: 'token successfully renewed' })
-	@ApiUnauthorizedResponse({ description: 'Refresh token invalid or expired' })
+	@ApiOperation({ description: 'Rotate token' })
+	@ApiOkResponse({ description: 'Rotate token successfully' })
 	@Post('/token/refresh')
+	@HttpCode(200)
 	async getNewToken(
 		@Body(ValidationPipe) refreshTokenDto: RefreshTokenRequestDto
 	): Promise<TokenDto> {
@@ -53,6 +56,8 @@ export class AuthController {
 	}
 
 	@SkipAuth()
+	@ApiOperation({ description: 'Verify opt' })
+	@ApiOkResponse({ description: 'Verify opt successfully' })
 	@Post('verify')
 	@HttpCode(200)
 	verify(@Body() otpDto: VerifyDto) {

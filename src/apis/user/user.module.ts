@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OTPEntity } from './entities/otp.entity';
+import { RefreshTokenEntity } from './entities/refreshToken.entity';
 import { UserEntity } from './entities/user.entity';
 import { CreateUserHandler } from './handlers/create-user.handler';
 import { GetAllUserPaginatedHandler } from './handlers/get-all-user-paginated.handler';
@@ -12,7 +13,7 @@ import { IUserService } from './user.interface';
 import { UserService } from './user.service';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([UserEntity, OTPEntity])],
+	imports: [TypeOrmModule.forFeature([UserEntity, OTPEntity, RefreshTokenEntity])],
 	controllers: [UserController],
 	providers: [
 		{

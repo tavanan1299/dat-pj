@@ -4,6 +4,7 @@ import { hash } from 'argon2';
 import { Exclude } from 'class-transformer';
 import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import { OTPEntity } from './otp.entity';
+import { RefreshTokenEntity } from './refreshToken.entity';
 
 @Entity({ name: 'user' })
 export class UserEntity extends BaseEntity {
@@ -24,6 +25,9 @@ export class UserEntity extends BaseEntity {
 
 	@OneToMany(() => OTPEntity, (otp) => otp.user)
 	otps!: OTPEntity[];
+
+	@OneToMany(() => RefreshTokenEntity, (rt) => rt.user)
+	rts!: RefreshTokenEntity[];
 
 	@BeforeInsert()
 	async beforeInsert() {
