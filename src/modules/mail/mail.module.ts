@@ -18,8 +18,8 @@ import { MailService } from './mail.service';
 			useFactory(configService: ConfigService) {
 				return createTransport({
 					host: configService.get<string>('MAIL_HOST'),
-					from: configService.get<string>('MAIL_FROM'),
-					secure: true,
+					from: configService.get<string>('MAIL_USER'),
+					secure: false,
 					auth: {
 						user: configService.get<string>('MAIL_USER'),
 						pass: configService.get<string>('MAIL_PASS')

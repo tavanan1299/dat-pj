@@ -1,6 +1,7 @@
 import { OTPEntity } from '@app/apis/user/entities/otp.entity';
 import { IUserService } from '@app/apis/user/user.interface';
 import { randomOTP } from '@app/common';
+import { IMailService } from '@app/modules/mail';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { RegisterCommand } from '../commands/register.command';
@@ -9,7 +10,10 @@ import { RegisterCommand } from '../commands/register.command';
 export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
 	private logger = new Logger(RegisterUserHandler.name);
 
-	constructor(private readonly userService: IUserService) {}
+	constructor(
+		private readonly userService: IUserService,
+		private readonly mailService: IMailService
+	) {}
 
 	async execute(command: RegisterCommand) {
 		try {
@@ -25,6 +29,12 @@ export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
 				});
 
 				await OTPEntity.save(newOTP);
+
+				await this.mailService.sendOTP({
+					otp: randomOtp,
+					to: newUser.email,
+					expiresInMinute: 10
+				});
 			}
 
 			return newUser;
