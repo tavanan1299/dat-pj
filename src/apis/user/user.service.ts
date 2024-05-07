@@ -18,6 +18,9 @@ export class UserService extends IUserService {
 		if (!user) {
 			throw new UnauthorizedException('Không tìm thấy user');
 		}
+		if (user.isActive === false) {
+			throw new UnauthorizedException('User chưa được kích hoạt');
+		}
 		const comparePassword = await verify(user.password, password);
 		if (!comparePassword) {
 			throw new UnauthorizedException('Sai mật khẩu');

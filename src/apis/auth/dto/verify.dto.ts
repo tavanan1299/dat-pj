@@ -3,10 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber } from 'class-validator';
 
 export class VerifyDto {
-	@ApiProperty({ description: 'User Id cần xác nhận' })
+	@ApiProperty({ description: 'Email cần xác nhận' })
 	@IsString()
 	@IsNotEmpty()
-	userId!: string;
+	email!: string;
 
 	@ApiProperty({ description: 'Mã OTP' })
 	@IsNumber()

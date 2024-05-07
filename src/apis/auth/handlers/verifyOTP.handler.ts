@@ -18,17 +18,23 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 			this.logger.debug('execute');
 			const { data } = command;
 
+			const currentUser = await UserEntity.findOne({
+				where: {
+					email: data.email
+				}
+			});
+
 			const otpBefore = await OTPEntity.findOne({
 				where: {
 					type: OTPType.CONFIRM_ACCOUNT,
-					userId: data.userId,
+					userId: currentUser?.id,
 					expiresAt: MoreThan(new Date())
 				}
 			});
 
 			if (otpBefore && otpBefore.otp === data.otp) {
 				await UserEntity.save({
-					id: data.userId,
+					id: currentUser?.id,
 					isActive: true
 				});
 
