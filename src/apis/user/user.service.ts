@@ -14,18 +14,22 @@ export class UserService extends IUserService {
 	}
 
 	async validateUserByEmailPassword(email: string, password: string): Promise<UserEntity> {
-		const user = await this.getOne({ where: { email } });
-		if (!user) {
-			throw new UnauthorizedException('Không tìm thấy user');
+		try {
+			const user = await this.getOne({ where: { email } });
+			if (!user) {
+				throw new UnauthorizedException('Không tìm thấy user');
+			}
+			if (user.isActive === false) {
+				throw new UnauthorizedException('User chưa được kích hoạt');
+			}
+			const comparePassword = await verify(user.password, password);
+			if (!comparePassword) {
+				throw new UnauthorizedException('Sai mật khẩu');
+			}
+			return user;
+		} catch (error) {
+			throw error;
 		}
-		if (user.isActive === false) {
-			throw new UnauthorizedException('User chưa được kích hoạt');
-		}
-		const comparePassword = await verify(user.password, password);
-		if (!comparePassword) {
-			throw new UnauthorizedException('Sai mật khẩu');
-		}
-		return user;
 	}
 
 	async validateUserById(id: string): Promise<UserEntity> {

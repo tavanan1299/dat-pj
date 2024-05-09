@@ -12,14 +12,14 @@ export class JwtService extends IJwtService {
 	}
 
 	sign(payload: JwtPayload, options?: Omit<JwtSignOptions, 'secret'>) {
-		return this.jwtService.signAsync(payload, {
+		return this.jwtService.sign(payload, {
 			...options,
 			secret: this.SECRET_JWT
 		});
 	}
 
 	verify(token: string) {
-		return this.jwtService.verifyAsync<JwtPayload>(token, {
+		return this.jwtService.verify<JwtPayload>(token, {
 			secret: this.SECRET_JWT
 		});
 	}

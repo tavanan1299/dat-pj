@@ -39,6 +39,7 @@ export class JwtAuthGuard extends AuthGuard(AuthStrategy.USER_JWT) {
 		}
 
 		const payload = this.tokenService.verifyToken(accessToken, TokenType.AccessToken);
+
 		if (!payload) {
 			throw new UnauthorizedException();
 		}

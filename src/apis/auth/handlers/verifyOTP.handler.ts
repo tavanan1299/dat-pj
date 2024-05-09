@@ -40,30 +40,10 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 					});
 					await OTPEntity.remove(otpBefore);
 
-					return 'Xác thực tài khoản thành công!';
+					return 'Verify account sussces!';
 				}
-				return 'Mã xác thực không đúng hoặc hết hạn!';
+				return 'OTP is not valid or expired!';
 			}
-
-			const currentUser = await UserEntity.findOne({
-				where: {
-					email: data.email
-				}
-			});
-
-			const isForgottenPassword = await OTPEntity.findOne({
-				where: {
-					type: OTPType.FORGOT_PASSWORD,
-					userId: currentUser?.id
-				}
-			});
-
-			if (isForgottenPassword && isForgottenPassword.otp === data.otp) {
-				await OTPEntity.remove(isForgottenPassword);
-				return 'OTP is valid!';
-			}
-
-			return 'Mã xác thực không đúng hoặc hết hạn!';
 		} catch (error) {
 			throw new BadRequestException('An error occurred. Please try again!');
 		}

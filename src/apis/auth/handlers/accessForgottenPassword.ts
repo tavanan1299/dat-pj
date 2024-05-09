@@ -46,7 +46,6 @@ export class AccessForgottenPasswordHandler
 			//
 			return 'OTP is not valid!';
 		} catch (error) {
-			console.log(error);
 			throw new BadRequestException('An error occurred. Please try again!');
 		}
 	}

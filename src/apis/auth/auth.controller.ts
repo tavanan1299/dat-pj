@@ -74,10 +74,11 @@ export class AuthController {
 	@ApiOkResponse({ description: 'Reset password successfully' })
 	@Post('resetPassword')
 	@HttpCode(200)
-	resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-		return this.commandBus.execute(new ResetPasswordCommand({ data: resetPasswordDto }));
+	resetPassword(@Body() data: ResetPasswordDto, @User() user: UserEntity) {
+		return this.commandBus.execute(new ResetPasswordCommand({ data: { ...data, user } }));
 	}
 
+	@SkipAuth()
 	@ApiOperation({ description: 'Forgotten password' })
 	@ApiOkResponse({ description: 'Forgotten password successfully' })
 	@Post('forgottenPassword')
@@ -86,6 +87,7 @@ export class AuthController {
 		return this.commandBus.execute(new ForgottenPasswordCommand({ data: forgottenPassword }));
 	}
 
+	@SkipAuth()
 	@ApiOperation({ description: 'Access Forgotten password' })
 	@ApiOkResponse({ description: 'Access forgotten password successfully' })
 	@Post('accessForgottenPassword')

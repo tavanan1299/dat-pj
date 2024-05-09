@@ -19,14 +19,18 @@ export class ForgottenPasswordHandler implements ICommandHandler<ForgottenPasswo
 			const { data } = command;
 
 			const userForgottenPassword = await UserEntity.findOne({
-				where: { email: data.email }
+				where: { email: data.email },
+				relations: ['otp']
 			});
 
 			if (!userForgottenPassword) {
 				throw new BadRequestException('User not found.');
 			}
 
-			await OTPEntity.delete({ userId: data.id, type: OTPType.FORGOT_PASSWORD });
+			await OTPEntity.delete({
+				userId: userForgottenPassword.id,
+				type: OTPType.FORGOT_PASSWORD
+			});
 
 			const randomOtp = randomOTP(6);
 			const newOTP = OTPEntity.create({
