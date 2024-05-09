@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { IAuthService } from './auth.interface';
 import { AuthService } from './auth.service';
+import { AccessForgottenPasswordHandler } from './handlers/accessForgottenPassword';
 import { ForgottenPasswordHandler } from './handlers/forgottenPassword.handler';
 import { LoginHandler } from './handlers/login.handler';
 import { RegisterUserHandler } from './handlers/register.handler';
@@ -36,7 +37,8 @@ import { TokenService } from './token.service';
 		RegisterUserHandler,
 		VerifyUserHandler,
 		ResetPasswordHandler,
-		ForgottenPasswordHandler
+		ForgottenPasswordHandler,
+		AccessForgottenPasswordHandler
 	]
 })
 export class AuthModule {}

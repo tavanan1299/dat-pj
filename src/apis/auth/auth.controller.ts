@@ -6,11 +6,13 @@ import { CommandBus } from '@nestjs/cqrs';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { AuthStrategy } from './auth.const';
+import { AccessForgottenPasswordCommand } from './commands/accessForgottenPassword.command';
 import { ForgottenPasswordCommand } from './commands/forgottenPassword.command';
 import { LoginCommand } from './commands/login.command';
 import { RegisterCommand } from './commands/register.command';
 import { ResetPasswordCommand } from './commands/resetpassword.command';
 import { VerifyCommand } from './commands/verifyOTP.command';
+import { AccessForgottenPasswordDto } from './dto/access-forgotten-password.dto';
 import { ForgottenPasswordDto } from './dto/forgotten-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RefreshTokenRequestDto } from './dto/refresh-token-request.dto';
@@ -82,5 +84,15 @@ export class AuthController {
 	@HttpCode(200)
 	forgottenPassword(@Body() forgottenPassword: ForgottenPasswordDto) {
 		return this.commandBus.execute(new ForgottenPasswordCommand({ data: forgottenPassword }));
+	}
+
+	@ApiOperation({ description: 'Access Forgotten password' })
+	@ApiOkResponse({ description: 'Access forgotten password successfully' })
+	@Post('accessForgottenPassword')
+	@HttpCode(200)
+	accessForgottenPassword(@Body() accessForgottenPassword: AccessForgottenPasswordDto) {
+		return this.commandBus.execute(
+			new AccessForgottenPasswordCommand({ data: accessForgottenPassword })
+		);
 	}
 }
