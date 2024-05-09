@@ -1,6 +1,7 @@
+import { OTPType } from '@app/common/enums/otpType.enum';
 import { IsNotEmpty, IsString } from '@common';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
+import { IsEnum, IsNumber } from 'class-validator';
 
 export class VerifyDto {
 	@ApiProperty({ description: 'Email cần xác nhận' })
@@ -12,4 +13,9 @@ export class VerifyDto {
 	@IsNumber()
 	@IsNotEmpty()
 	otp!: number;
+
+	@ApiProperty({ description: 'Type Verify' })
+	@IsEnum(OTPType)
+	@IsNotEmpty()
+	type?: OTPType;
 }

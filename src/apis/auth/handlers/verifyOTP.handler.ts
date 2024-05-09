@@ -18,29 +18,49 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 			this.logger.debug('execute');
 			const { data } = command;
 
+			if (data.type === OTPType.CONFIRM_ACCOUNT) {
+				const currentUser = await UserEntity.findOne({
+					where: {
+						email: data.email
+					}
+				});
+
+				const otpBefore = await OTPEntity.findOne({
+					where: {
+						type: OTPType.CONFIRM_ACCOUNT,
+						userId: currentUser?.id,
+						expiresAt: MoreThan(new Date())
+					}
+				});
+
+				if (otpBefore && otpBefore.otp === data.otp) {
+					await UserEntity.save({
+						id: currentUser?.id,
+						isActive: true
+					});
+					await OTPEntity.remove(otpBefore);
+
+					return 'Xác thực tài khoản thành công!';
+				}
+				return 'Mã xác thực không đúng hoặc hết hạn!';
+			}
+
 			const currentUser = await UserEntity.findOne({
 				where: {
 					email: data.email
 				}
 			});
 
-			const otpBefore = await OTPEntity.findOne({
+			const isForgottenPassword = await OTPEntity.findOne({
 				where: {
-					type: OTPType.CONFIRM_ACCOUNT,
-					userId: currentUser?.id,
-					expiresAt: MoreThan(new Date())
+					type: OTPType.FORGOT_PASSWORD,
+					userId: currentUser?.id
 				}
 			});
 
-			if (otpBefore && otpBefore.otp === data.otp) {
-				await UserEntity.save({
-					id: currentUser?.id,
-					isActive: true
-				});
-
-				await OTPEntity.remove(otpBefore);
-
-				return 'Xác thực tài khoản thành công!';
+			if (isForgottenPassword && isForgottenPassword.otp === data.otp) {
+				await OTPEntity.remove(isForgottenPassword);
+				return 'OTP is valid!';
 			}
 
 			return 'Mã xác thực không đúng hoặc hết hạn!';
