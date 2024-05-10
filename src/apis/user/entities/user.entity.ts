@@ -19,7 +19,7 @@ export class UserEntity extends BaseEntity {
 	@Exclude()
 	password!: string;
 
-	@ApiProperty({ description: 'Kích hoạt' })
+	@ApiProperty({ description: 'Active' })
 	@Column({ default: false })
 	isActive!: boolean;
 

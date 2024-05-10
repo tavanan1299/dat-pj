@@ -6,8 +6,11 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { IAuthService } from './auth.interface';
 import { AuthService } from './auth.service';
+import { ChangePasswordHandler } from './handlers/changePassword.handler';
+import { ForgotPasswordHandler } from './handlers/forgotPassword.handler';
 import { LoginHandler } from './handlers/login.handler';
 import { RegisterUserHandler } from './handlers/register.handler';
+import { ResetPasswordHandler } from './handlers/resetPassword.handler';
 import { VerifyUserHandler } from './handlers/verifyOTP.handler';
 import { UserJwtStrategy } from './strategies/jwt/user.jwt.strategy';
 import { UserLocalStrategy } from './strategies/local/user.local.strategy';
@@ -32,7 +35,10 @@ import { TokenService } from './token.service';
 
 		LoginHandler,
 		RegisterUserHandler,
-		VerifyUserHandler
+		VerifyUserHandler,
+		ForgotPasswordHandler,
+		ResetPasswordHandler,
+		ChangePasswordHandler
 	]
 })
 export class AuthModule {}

@@ -12,7 +12,7 @@ export class OTPEntity extends BaseEntity {
 	@Column({ type: 'enum', enum: OTPType, default: OTPType.CONFIRM_ACCOUNT })
 	type!: OTPType;
 
-	@ApiProperty({ description: 'Kích hoạt' })
+	@ApiProperty({ description: 'Active' })
 	@Column({ default: true })
 	isActive!: boolean;
 
