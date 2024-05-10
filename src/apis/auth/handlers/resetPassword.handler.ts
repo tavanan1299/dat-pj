@@ -1,19 +1,19 @@
 import { OTPEntity } from '@app/apis/user/entities/otp.entity';
 import { UserEntity } from '@app/apis/user/entities/user.entity';
-import { IUserService } from '@app/apis/user/user.interface';
 import { OTPType } from '@app/common/enums/otpType.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { hash } from 'argon2';
 import { MoreThan } from 'typeorm';
-import { VerifyCommand } from '../commands/verifyOTP.command';
+import { ResetPasswordCommand } from '../commands/resetPassword.command';
 
-@CommandHandler(VerifyCommand)
-export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
-	private logger = new Logger(VerifyUserHandler.name);
+@CommandHandler(ResetPasswordCommand)
+export class ResetPasswordHandler implements ICommandHandler<ResetPasswordCommand> {
+	private logger = new Logger(ResetPasswordHandler.name);
 
-	constructor(private readonly userService: IUserService) {}
+	constructor() {}
 
-	async execute(command: VerifyCommand) {
+	async execute(command: ResetPasswordCommand) {
 		try {
 			this.logger.debug('execute');
 			const { data } = command;
@@ -26,7 +26,7 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 
 			const otpBefore = await OTPEntity.findOne({
 				where: {
-					type: OTPType.CONFIRM_ACCOUNT,
+					type: OTPType.FORGOT_PASSWORD,
 					userId: currentUser?.id,
 					expiresAt: MoreThan(new Date())
 				}
@@ -34,13 +34,13 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 
 			if (otpBefore && otpBefore.otp === data.otp) {
 				await UserEntity.save({
-					id: currentUser?.id,
-					isActive: true
+					id: otpBefore.userId,
+					password: await hash(data.password)
 				});
 
 				await OTPEntity.remove(otpBefore);
 
-				return 'Verify successfully!';
+				return 'Reset password successfully!';
 			}
 
 			return 'OTP code is invalid or expired!';

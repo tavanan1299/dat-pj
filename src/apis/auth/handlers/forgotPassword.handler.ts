@@ -1,29 +1,34 @@
 import { OTPEntity } from '@app/apis/user/entities/otp.entity';
 import { IUserService } from '@app/apis/user/user.interface';
 import { randomOTP } from '@app/common';
+import { OTPType } from '@app/common/enums/otpType.enum';
 import { IMailService } from '@app/modules/mail';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { RegisterCommand } from '../commands/register.command';
+import { ForgotPasswordCommand } from '../commands/forgotPassword.command';
 
-@CommandHandler(RegisterCommand)
-export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
-	private logger = new Logger(RegisterUserHandler.name);
+@CommandHandler(ForgotPasswordCommand)
+export class ForgotPasswordHandler implements ICommandHandler<ForgotPasswordCommand> {
+	private logger = new Logger(ForgotPasswordHandler.name);
 
 	constructor(
 		private readonly userService: IUserService,
 		private readonly mailService: IMailService
 	) {}
 
-	async execute(command: RegisterCommand) {
+	async execute(command: ForgotPasswordCommand) {
 		try {
 			this.logger.debug('execute');
-			const { user } = command;
-			const newUser = await this.userService.create(user);
+			const { data } = command;
 
-			if (newUser) {
+			const user = await this.userService.getOne({ where: { email: data.email } });
+
+			if (!user) {
+				throw new BadRequestException(`Email: ${data.email} is not exist is our system`);
+			}
+
+			if (user) {
 				let randomOtp: string = randomOTP(6);
-
 				while (randomOtp) {
 					const opt = await OTPEntity.findOne({ where: { otp: +randomOtp } });
 					if (!opt) break;
@@ -31,7 +36,8 @@ export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
 				}
 
 				const newOTP = OTPEntity.create({
-					user: newUser,
+					userId: user.id,
+					type: OTPType.FORGOT_PASSWORD,
 					otp: Number(randomOtp)
 				});
 
@@ -39,14 +45,14 @@ export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
 
 				await this.mailService.sendOTP({
 					otp: randomOtp,
-					to: newUser.email,
+					to: user.email,
 					expiresInMinute: 10
 				});
 			}
 
-			return newUser;
-		} catch (error) {
-			throw new BadRequestException('An error occurred. Please try again!');
+			return true;
+		} catch (error: any) {
+			throw new BadRequestException(error.message);
 		}
 	}
 }
