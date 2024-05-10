@@ -7,5 +7,5 @@ export const UseUserGuard = () =>
 	applyDecorators(
 		UseGuards(AuthGuard(AuthStrategy.USER_JWT)),
 		ApiBearerAuth(),
-		ApiUnauthorizedResponse({ description: 'Thiếu hoặc sai token' })
+		ApiUnauthorizedResponse({ description: 'Unauthorize access' })
 	);

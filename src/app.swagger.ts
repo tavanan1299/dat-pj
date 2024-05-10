@@ -7,7 +7,7 @@ export function useSwagger(app: INestApplication) {
 	const logger = new Logger('Swagger');
 	const port = process.env.PORT || 3000;
 	const path = 'docs';
-	const title = 'NestJS Boilerplate';
+	const title = 'NestJS';
 	const version = packageJson.version;
 	const description = packageJson.description;
 
