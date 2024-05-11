@@ -1,4 +1,4 @@
-import { ApiController, ApiCreate, ApiGetOne, User } from '@app/common';
+import { ApiController, ApiCreate, ApiGetOne, UseUserGuard, User } from '@app/common';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
@@ -10,6 +10,7 @@ import { VerifyUserEntity } from './entities/verify-user.entity';
 
 @Controller('verify-user')
 @ApiController('Verify User')
+@UseUserGuard()
 export class VerifyUserController {
 	constructor(private readonly commandBus: CommandBus) {}
 
