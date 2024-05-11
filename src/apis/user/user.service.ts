@@ -7,7 +7,7 @@ import { IUserService } from './user.interface';
 
 @Injectable()
 export class UserService extends IUserService {
-	notFoundMessage = 'Không tìm thấy User';
+	notFoundMessage = 'User Not Found!';
 
 	constructor(@InjectRepository(UserEntity) private readonly userRepo: Repository<UserEntity>) {
 		super(userRepo);
@@ -16,14 +16,14 @@ export class UserService extends IUserService {
 	async validateUserByEmailPassword(email: string, password: string): Promise<UserEntity> {
 		const user = await this.getOne({ where: { email } });
 		if (!user) {
-			throw new UnauthorizedException('Không tìm thấy user');
+			throw new UnauthorizedException('User Not Found');
 		}
 		if (user.isActive === false) {
-			throw new UnauthorizedException('User chưa được kích hoạt');
+			throw new UnauthorizedException('User has not been activated yet');
 		}
 		const comparePassword = await verify(user.password, password);
 		if (!comparePassword) {
-			throw new UnauthorizedException('Sai mật khẩu');
+			throw new UnauthorizedException('Password Incorrect');
 		}
 		return user;
 	}

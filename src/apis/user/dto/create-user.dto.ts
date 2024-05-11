@@ -2,12 +2,12 @@ import { IsNotEmpty, IsString } from '@common';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
-	@ApiProperty({ description: 'Tên đăng nhập' })
+	@ApiProperty({ description: 'Email' })
 	@IsString()
 	@IsNotEmpty()
 	email!: string;
 
-	@ApiProperty({ description: 'Mật khẩu đăng nhập' })
+	@ApiProperty({ description: 'Password' })
 	@IsString()
 	@IsNotEmpty()
 	password!: string;

@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 import { ChangePasswordHandler } from './handlers/changePassword.handler';
 import { ForgotPasswordHandler } from './handlers/forgotPassword.handler';
 import { LoginHandler } from './handlers/login.handler';
+import { LogoutHandler } from './handlers/logout.handler';
 import { RegisterUserHandler } from './handlers/register.handler';
 import { ResetPasswordHandler } from './handlers/resetPassword.handler';
 import { VerifyUserHandler } from './handlers/verifyOTP.handler';
@@ -38,7 +39,8 @@ import { TokenService } from './token.service';
 		VerifyUserHandler,
 		ForgotPasswordHandler,
 		ResetPasswordHandler,
-		ChangePasswordHandler
+		ChangePasswordHandler,
+		LogoutHandler
 	]
 })
 export class AuthModule {}
