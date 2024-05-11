@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsString } from 'class-validator';
+import { IsDate, IsString, IsUrl } from 'class-validator';
 
 export class CreateVerifyUserDto {
 	@ApiProperty({ description: 'Avatar' })
@@ -10,6 +10,7 @@ export class CreateVerifyUserDto {
 
 	@ApiProperty({ description: 'Phone' })
 	@IsString()
+	@IsUrl(undefined, { message: 'Image is not valid.' })
 	faceID?: string;
 
 	@ApiProperty({ description: 'Address' })
@@ -18,5 +19,6 @@ export class CreateVerifyUserDto {
 
 	@ApiProperty({ description: 'City' })
 	@IsString()
+	@IsUrl(undefined, { message: 'Image is not valid.' })
 	citizenID?: string;
 }

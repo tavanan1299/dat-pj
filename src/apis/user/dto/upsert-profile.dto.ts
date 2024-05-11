@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class UpsertProfileDto {
 	@ApiProperty({ description: 'Avatar' })
 	@IsOptional()
 	@IsString()
+	@IsUrl(undefined, { message: 'Image is not valid.' })
 	avatar?: string;
 
 	@ApiProperty({ description: 'Full name' })
