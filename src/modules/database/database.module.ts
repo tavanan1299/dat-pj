@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User1706412751363 } from './migrations/1706412751363-user';
 
 @Module({
 	imports: [
@@ -9,6 +8,7 @@ import { User1706412751363 } from './migrations/1706412751363-user';
 			inject: [ConfigService],
 			useFactory: (configService: ConfigService) => ({
 				type: 'postgres',
+				timezone: 'UTC',
 				host: configService.get<string>('DB_HOST'),
 				port: configService.get<number>('DB_PORT'),
 				username: configService.get<string>('DB_USERNAME'),
@@ -17,9 +17,15 @@ import { User1706412751363 } from './migrations/1706412751363-user';
 				schema: configService.get<string>('DB_SCHEMA'),
 				autoLoadEntities: true,
 				migrationsTableName: `migrations`,
-				migrations: [User1706412751363],
+				migrations: [__dirname + '/migrations/*{.ts,.js}'],
 				migrationsRun: true,
-				synchronize: false
+				synchronize: false,
+				ssl: true,
+				extra: {
+					ssl: {
+						rejectUnauthorized: false
+					}
+				}
 			})
 		})
 	]

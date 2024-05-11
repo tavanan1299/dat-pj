@@ -7,48 +7,16 @@ on:
 
 env:
     AWS_REGION: ap-southeast-2
-    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     PRIVATE_SSH_KEY: ${{ secrets.AWS_SSH_KEY }}
     SERVER_PUBLIC_IP: ${{ secrets.AWS_PUBLIC_KEY }}
 
-    # Environment variables
-    NODE_ENV: production
-    PORT: 3000
-    DB_HOST: db
-    DB_PORT: 5432
-    DB_HOST_PORT: 5433
-    DB_NAME: mypostgresdb
-    DB_SCHEMA: public
-    SECRET_JWT: super_strong_secret123@s
-    MAIL_HOST: smtp.gmail.com
-    MAIL_FROM: example@gmail.com
-    MAIL_USER: example@gmail.com
-    MAIL_PASS: hashed_password
-
 jobs:
     deploy:
-        env:
-            DB_USERNAME: ${{ secrets.DB_USERNAME }}
-            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         if: github.event.pull_request.merged == true
         runs-on: ubuntu-latest
         steps:
-            - name: Get latest code
-              uses: actions/checkout@v4
-              with:
-                  ref: production
-            - name: Login to AWS ECR
-              id: login-ecr
-              uses: aws-actions/amazon-ecr-login@v1
-            - name: Build, push docker image
-              env:
-                  REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-                  REPOSITORY: dat-pj
-                  IMAGE_TAG: ${{ github.sha }}
-              run: |-
-                  docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-                  docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
             - name: SSH into EC2 and deploy
               uses: appleboy/ssh-action@master
               with:
@@ -57,6 +25,10 @@ jobs:
                   key: ${{ env.PRIVATE_SSH_KEY }}
                   envs: PRIVATE_SSH_KEY,REGISTRY,REPOSITORY,IMAGE_TAG,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_DEFAULT_REGION,AWS_REGION,NODE_ENV,PORT,DB_HOST,DB_PORT,DB_HOST_PORT,DB_NAME,DB_SCHEMA,SECRET_JWT,MAIL_HOST,MAIL_FROM,MAIL_USER,MAIL_PASS,DB_USERNAME,DB_PASSWORD
                   script: |-
-                      sudo $(aws ecr get-login --no-include-email --region ap-southeast-2);
-                      sudo docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
-                      sudo docker run -d --name mycontainer -p ${{ env.PORT }}:3000 $REGISTRY/$REPOSITORY:$IMAGE_TAG
+                      cd dat-pj
+                      git pull origin production
+                      rm -rf node_modules
+                      npm install
+                      npm run build
+                      pm2 stop dist/src/main
+                      TZ=UTC pm2 start dist/src/main

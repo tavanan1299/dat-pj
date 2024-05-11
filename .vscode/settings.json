@@ -1,0 +1,82 @@
+{
+	"workbench.iconTheme": "material-icon-theme",
+	"editor.inlineSuggest.enabled": true,
+	"editor.fontSize": 15,
+	"editor.fontFamily": "'Fira Code'",
+	"editor.fontLigatures": true,
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"remote.SSH.remotePlatform": {
+		"thanh-ec2": "linux",
+		"dev-devplus": "linux"
+	},
+	"editor.formatOnSave": true,
+
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "explicit",
+		"source.organizeImports": "explicit"
+	},
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"eslint.workingDirectories": [
+		{
+			"mode": "auto"
+		}
+	],
+	"codeium.enableConfig": {
+		"*": true,
+		"javascriptreact": false
+	},
+	"window.titleBarStyle": "custom",
+	"terminal.integrated.fontFamily": "monospace",
+	"workbench.colorTheme": "Default Dark+",
+	"githubPullRequests.pullBranch": "never",
+	"vscodeGoogleTranslate.preferredLanguage": "Vietnamese",
+	//
+	"javascript.inlayHints.enumMemberValues.enabled": true,
+	// You can set this to 'all' or 'literals' to enable more hints, default is none
+	"javascript.inlayHints.parameterNames.enabled": "literals",
+	"typescript.inlayHints.enumMemberValues.enabled": true,
+	"typescript.inlayHints.functionLikeReturnTypes.enabled": true,
+	// You can set this to 'all' or 'literals' to enable more hints, default is none
+	"typescript.inlayHints.parameterNames.enabled": "literals",
+	"javascript.inlayHints.functionLikeReturnTypes.enabled": true,
+	"material-icon-theme.activeIconPack": "nest",
+	"redhat.telemetry.enabled": true,
+	"vs-kubernetes": {
+		"vscode-kubernetes.helm-path.linux": "/home/thanh/.local/state/vs-kubernetes/tools/helm/linux-amd64/helm",
+		"vscode-kubernetes.minikube-path.linux": "/home/thanh/.local/state/vs-kubernetes/tools/minikube/linux-amd64/minikube"
+	},
+	"yaml.customTags": [
+		"!And",
+		"!And sequence",
+		"!If",
+		"!If sequence",
+		"!Not",
+		"!Not sequence",
+		"!Equals",
+		"!Equals sequence",
+		"!Or",
+		"!Or sequence",
+		"!FindInMap",
+		"!FindInMap sequence",
+		"!Base64",
+		"!Join",
+		"!Join sequence",
+		"!Cidr",
+		"!Ref",
+		"!Sub",
+		"!Sub sequence",
+		"!GetAtt",
+		"!GetAZs",
+		"!ImportValue",
+		"!ImportValue sequence",
+		"!Select",
+		"!Select sequence",
+		"!Split",
+		"!Split sequence"
+	],
+	"terminal.integrated.env.osx": {
+		"FIG_NEW_SESSION": "1"
+	}
+}

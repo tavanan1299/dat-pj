@@ -16,6 +16,12 @@ export default new DataSource({
 	schema: configService.get<string>('DB_SCHEMA'),
 	entities: ['**/*.entity.js'],
 	migrationsTableName: `migrations`,
-	migrations: [],
-	synchronize: false
+	migrations: [__dirname + '/src/modules/database/migrations/*{.ts,.js}'],
+	synchronize: false,
+	ssl: true,
+	extra: {
+		ssl: {
+			rejectUnauthorized: false
+		}
+	}
 });

@@ -22,7 +22,7 @@ export class MailService extends IMailService {
 		const template = getOtpTemplate(payload);
 		return this.sendMail({
 			...payload,
-			subject: 'Forgot password',
+			subject: 'Verify Account',
 			html: template
 		});
 	}

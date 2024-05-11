@@ -8,7 +8,7 @@ export abstract class IJwtService {
 	 * @return Promise<string>
 	 * @example const accessToken = await this.jwtService.sign({ id: uuid }, { expiresIn: '1 day' });
 	 */
-	abstract sign(payload: JwtPayload, options?: Omit<JwtSignOptions, 'secret'>): Promise<string>;
+	abstract sign(payload: JwtPayload, options?: Omit<JwtSignOptions, 'secret'>): string;
 
     /** 
 	 * Verify access token
@@ -16,5 +16,5 @@ export abstract class IJwtService {
      * @return Promise<JwtPayload>
      * @example const payload = await this.jwtService.verify(token);
      */
-	abstract verify(token: string): Promise<JwtPayload>;
+	abstract verify(token: string): JwtPayload;
 }

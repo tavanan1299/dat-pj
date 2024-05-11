@@ -13,10 +13,13 @@ export class UserService extends IUserService {
 		super(userRepo);
 	}
 
-	async validateUserByUsernamePassword(username: string, password: string): Promise<UserEntity> {
-		const user = await this.getOne({ where: { username } });
+	async validateUserByEmailPassword(email: string, password: string): Promise<UserEntity> {
+		const user = await this.getOne({ where: { email } });
 		if (!user) {
 			throw new UnauthorizedException('Không tìm thấy user');
+		}
+		if (user.isActive === false) {
+			throw new UnauthorizedException('User chưa được kích hoạt');
 		}
 		const comparePassword = await verify(user.password, password);
 		if (!comparePassword) {

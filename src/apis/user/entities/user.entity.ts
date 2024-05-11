@@ -1,20 +1,33 @@
 import { BaseEntity } from '@common';
-import { ApiHideProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { hash } from 'argon2';
 import { Exclude } from 'class-transformer';
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
+import { OTPEntity } from './otp.entity';
+import { RefreshTokenEntity } from './refreshToken.entity';
 
 @Entity({ name: 'user' })
 export class UserEntity extends BaseEntity {
-	/** Tài khoản đăng nhập */
-	@Column()
+	@Column({ nullable: true })
 	username!: string;
 
-	/** Mật khẩu */
+	@Column()
+	email!: string;
+
 	@ApiHideProperty()
 	@Column()
 	@Exclude()
 	password!: string;
+
+	@ApiProperty({ description: 'Active' })
+	@Column({ default: false })
+	isActive!: boolean;
+
+	@OneToMany(() => OTPEntity, (otp) => otp.user)
+	otps!: OTPEntity[];
+
+	@OneToMany(() => RefreshTokenEntity, (rt) => rt.user)
+	rts!: RefreshTokenEntity[];
 
 	@BeforeInsert()
 	async beforeInsert() {

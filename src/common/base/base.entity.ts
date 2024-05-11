@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-	Column,
 	CreateDateColumn,
 	DeleteDateColumn,
 	PrimaryGeneratedColumn,
@@ -28,9 +27,4 @@ export class BaseEntity extends TypeormBaseEntity {
 	@ApiProperty({ description: 'Ngày xoá' })
 	@DeleteDateColumn()
 	deletedAt?: Date | null;
-
-	/** Kích hoạt */
-	@ApiProperty({ description: 'Kích hoạt' })
-	@Column({ default: true })
-	isActive!: boolean;
 }

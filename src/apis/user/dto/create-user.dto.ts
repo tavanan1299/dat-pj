@@ -5,7 +5,7 @@ export class CreateUserDto {
 	@ApiProperty({ description: 'Tên đăng nhập' })
 	@IsString()
 	@IsNotEmpty()
-	username!: string;
+	email!: string;
 
 	@ApiProperty({ description: 'Mật khẩu đăng nhập' })
 	@IsString()
