@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { VerifyUserEntity } from '../verify-user/entities/verify-user.entity';
 import { OTPEntity } from './entities/otp.entity';
+import { ProfileEntity } from './entities/profile.entity';
 import { RefreshTokenEntity } from './entities/refreshToken.entity';
 import { UserEntity } from './entities/user.entity';
 import { CreateUserHandler } from './handlers/create-user.handler';
@@ -8,12 +10,21 @@ import { GetAllUserPaginatedHandler } from './handlers/get-all-user-paginated.ha
 import { GetOneUserByIdHandler } from './handlers/get-one-user-by-id.handler';
 import { RemoveUserByIdHandler } from './handlers/remove-user-by-id.handler';
 import { UpdateUserByIdHandler } from './handlers/update-user-by-id.handler';
+import { UpsertHandler } from './handlers/upsert-profile.handler';
 import { UserController } from './user.controller';
 import { IUserService } from './user.interface';
 import { UserService } from './user.service';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([UserEntity, OTPEntity, RefreshTokenEntity])],
+	imports: [
+		TypeOrmModule.forFeature([
+			UserEntity,
+			OTPEntity,
+			RefreshTokenEntity,
+			ProfileEntity,
+			VerifyUserEntity
+		])
+	],
 	controllers: [UserController],
 	providers: [
 		{
@@ -24,7 +35,8 @@ import { UserService } from './user.service';
 		GetAllUserPaginatedHandler,
 		GetOneUserByIdHandler,
 		RemoveUserByIdHandler,
-		UpdateUserByIdHandler
+		UpdateUserByIdHandler,
+		UpsertHandler
 	],
 	exports: [IUserService]
 })

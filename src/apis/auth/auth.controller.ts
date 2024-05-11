@@ -1,7 +1,15 @@
 import { UserEntity } from '@apis/user/entities/user.entity';
 import { SkipAuth } from '@app/common/guards/skip-auth.guard';
 import { ApiController, UseUserGuard, User } from '@common';
-import { Body, Controller, HttpCode, Post, UseGuards, ValidationPipe } from '@nestjs/common';
+import {
+	Body,
+	Controller,
+	HttpCode,
+	HttpStatus,
+	Post,
+	UseGuards,
+	ValidationPipe
+} from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
@@ -9,12 +17,14 @@ import { AuthStrategy } from './auth.const';
 import { ChangePasswordCommand } from './commands/changePassword.command';
 import { ForgotPasswordCommand } from './commands/forgotPassword.command';
 import { LoginCommand } from './commands/login.command';
+import { LogoutCommand } from './commands/logout.command';
 import { RegisterCommand } from './commands/register.command';
 import { ResetPasswordCommand } from './commands/resetPassword.command';
 import { VerifyCommand } from './commands/verifyOTP.command';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { LogoutDto } from './dto/logout.dto';
 import { RefreshTokenRequestDto } from './dto/refresh-token-request.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -30,9 +40,9 @@ export class AuthController {
 		private readonly tokenService: TokenService
 	) {}
 
-	@SkipAuth()
 	@ApiOperation({ description: 'Login' })
 	@ApiOkResponse({ description: 'Login successfully' })
+	@SkipAuth()
 	@UseGuards(AuthGuard(AuthStrategy.USER_LOCAL))
 	@Post('user/login')
 	@HttpCode(200)
@@ -90,6 +100,7 @@ export class AuthController {
 
 	@ApiOperation({ description: 'Change password' })
 	@ApiOkResponse({ description: 'Change password successfully' })
+	@UseUserGuard()
 	@Post('change-password')
 	@UseUserGuard()
 	@HttpCode(200)
@@ -100,5 +111,13 @@ export class AuthController {
 		return this.commandBus.execute(
 			new ChangePasswordCommand({ data: { ...changePasswordDto, user } })
 		);
+	}
+
+	@ApiOperation({ description: 'Logout' })
+	@UseUserGuard()
+	@Post('logout')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	logout(@Body() logoutDto: LogoutDto, @User() user: Record<string, any>) {
+		return this.commandBus.execute(new LogoutCommand({ data: { ...logoutDto, user } }));
 	}
 }

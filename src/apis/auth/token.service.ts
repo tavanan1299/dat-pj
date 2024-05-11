@@ -55,7 +55,7 @@ export class TokenService {
 			});
 
 			if (!rt) {
-				throw new UnauthorizedException('User không đúng');
+				throw new UnauthorizedException('User does not exist');
 			}
 
 			const { id } = await this.verifyToken(refreshToken, TokenType.RefreshToken);
