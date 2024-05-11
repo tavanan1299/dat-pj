@@ -30,9 +30,10 @@ export class StorageService {
 				return resData;
 			}
 		} catch (e: any) {
+			console.log(e);
 			throw new BadGatewayException({
 				errorCodes: 'UPLOAD_AVATAR_FAIL',
-				description: `Something wrong when upload avatar `
+				description: `Something wrong when upload avatar`
 			});
 		}
 	}
