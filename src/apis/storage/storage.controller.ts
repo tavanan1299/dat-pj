@@ -23,8 +23,8 @@ import { StorageService } from './storage.service';
 export class StorageController {
 	constructor(private readonly storageService: StorageService) {}
 
-	@ApiOperation({ summary: 'Upload user avatar' })
-	@ApiOkResponse({ description: 'Upload user avatar successfully' })
+	@ApiOperation({ summary: 'Upload image' })
+	@ApiOkResponse({ description: 'Upload image successfully' })
 	@ApiBody({
 		schema: {
 			type: 'object',
@@ -38,7 +38,7 @@ export class StorageController {
 		}
 	})
 	@ApiConsumes('multipart/form-data')
-	@Post('upload/avatar')
+	@Post('upload/image')
 	@UseInterceptors(FileInterceptor('file'))
 	async uploadAvatar(
 		@UploadedFile(
