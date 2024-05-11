@@ -24,16 +24,15 @@ import { TokenService } from './token.service';
 
 @Controller('auth')
 @ApiController('Auth')
-@UseUserGuard()
 export class AuthController {
 	constructor(
 		private readonly commandBus: CommandBus,
 		private readonly tokenService: TokenService
 	) {}
 
-	@SkipAuth()
 	@ApiOperation({ description: 'Login' })
 	@ApiOkResponse({ description: 'Login successfully' })
+	@SkipAuth()
 	@UseGuards(AuthGuard(AuthStrategy.USER_LOCAL))
 	@Post('user/login')
 	@HttpCode(200)
@@ -91,6 +90,7 @@ export class AuthController {
 
 	@ApiOperation({ description: 'Change password' })
 	@ApiOkResponse({ description: 'Change password successfully' })
+	@UseUserGuard()
 	@Post('change-password')
 	@HttpCode(200)
 	changePassword(
