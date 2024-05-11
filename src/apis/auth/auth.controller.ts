@@ -24,7 +24,6 @@ import { TokenService } from './token.service';
 
 @Controller('auth')
 @ApiController('Auth')
-@UseUserGuard()
 export class AuthController {
 	constructor(
 		private readonly commandBus: CommandBus,
@@ -92,6 +91,7 @@ export class AuthController {
 	@ApiOperation({ description: 'Change password' })
 	@ApiOkResponse({ description: 'Change password successfully' })
 	@Post('change-password')
+	@UseUserGuard()
 	@HttpCode(200)
 	changePassword(
 		@Body() changePasswordDto: ChangePasswordDto,
