@@ -1,4 +1,4 @@
-import { ApiController, ApiGetAll, ApiGetOne, PaginationDto, User } from '@common';
+import { ApiController, ApiGetAll, ApiGetOne, PaginationDto, UseUserGuard, User } from '@common';
 import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
@@ -10,7 +10,7 @@ import { UserEntity } from './entities/user.entity';
 
 @Controller('user')
 @ApiController('User')
-// @UseGuards(AuthGuard(AuthStrategy.USER_JWT))
+@UseUserGuard()
 export class UserController {
 	constructor(private readonly commandBus: CommandBus) {}
 
