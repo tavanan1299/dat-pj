@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class StorageService {
 	private readonly s3Client: S3Client;
-	private readonly s3AccessKeyId: string = this.configService.get('AWS_ACCESS_KEY_ID') as string;
+	private readonly s3AccessKeyId: string = this.configService.get('AWS_ACCESS_KEY') as string;
 	private readonly s3SecretAccessKey: string = this.configService.get(
 		'AWS_SECRET_ACCESS_KEY'
 	) as string;
