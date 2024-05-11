@@ -1,6 +1,6 @@
 import { UserEntity } from '@apis/user/entities/user.entity';
 import { SkipAuth } from '@app/common/guards/skip-auth.guard';
-import { ApiController, User } from '@common';
+import { ApiController, UseUserGuard, User } from '@common';
 import { Body, Controller, HttpCode, Post, UseGuards, ValidationPipe } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { AuthGuard } from '@nestjs/passport';
@@ -24,6 +24,7 @@ import { TokenService } from './token.service';
 
 @Controller('auth')
 @ApiController('Auth')
+@UseUserGuard()
 export class AuthController {
 	constructor(
 		private readonly commandBus: CommandBus,
