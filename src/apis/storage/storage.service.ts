@@ -7,7 +7,11 @@ export class StorageService {
 	constructor(private readonly configService: ConfigService) {}
 
 	private readonly s3Client = new S3Client({
-		region: this.configService.get('AWS_S3_REGION')
+		region: this.configService.get('AWS_S3_REGION'),
+		credentials: {
+			accessKeyId: String(this.configService.get('AWS_ACCESS_KEY_ID')),
+			secretAccessKey: String(this.configService.get('AWS_SECRET_ACCESS_KEY'))
+		}
 	});
 
 	async uploadAvatar(fileName: string, file: Buffer, contentType: string) {
