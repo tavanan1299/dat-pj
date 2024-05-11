@@ -32,8 +32,7 @@ export class UserEntity extends BaseEntity {
 	@JoinColumn()
 	profile!: ProfileEntity;
 
-	@OneToOne(() => VerifyUserEntity, (verify) => verify.user)
-	@JoinColumn()
+	@OneToMany(() => VerifyUserEntity, (verify) => verify.user)
 	verify!: VerifyUserEntity;
 
 	@BeforeInsert()

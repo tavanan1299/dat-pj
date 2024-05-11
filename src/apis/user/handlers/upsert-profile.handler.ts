@@ -40,6 +40,11 @@ export class UpsertHandler implements ICommandHandler<UpsertProfileCommand> {
 			});
 		}
 
-		return 'Upsert Successfully';
+		return await UserEntity.findOne({
+			where: {
+				id: user.id
+			},
+			relations: ['profile']
+		});
 	}
 }

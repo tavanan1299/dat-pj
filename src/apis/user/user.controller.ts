@@ -1,5 +1,5 @@
 import { ApiController, ApiGetAll, ApiGetOne, PaginationDto, User } from '@common';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { GetAllUserPaginatedCommand } from './commands/get-all-user-paginated.command';
 import { GetOneUserByIdCommand } from './commands/get-one-user-by-id.command';
@@ -13,8 +13,8 @@ import { UserEntity } from './entities/user.entity';
 export class UserController {
 	constructor(private readonly commandBus: CommandBus) {}
 
-	@Post('profile/upsert')
-	create(@Body() upsertProfile: UpsertProfileDto, @User() user: UserEntity) {
+	@Put('profile')
+	update(@Body() upsertProfile: UpsertProfileDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new UpsertProfileCommand({ user, data: upsertProfile }));
 	}
 
