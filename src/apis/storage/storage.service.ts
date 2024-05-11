@@ -4,19 +4,18 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class StorageService {
-	constructor(private readonly configService: ConfigService) {}
+	private readonly s3Client: S3Client;
 
-	private s3Region: string = this.configService.get('AWS_S3_REGION') as string;
-	private s3accessKeyId: string = this.configService.get('AWS_ACCESS_KEY_ID') as string;
-	private s3secretAccessKey: string = this.configService.get('AWS_SECRET_ACCESS_KEY') as string;
-
-	private readonly s3Client = new S3Client({
-		region: this.s3Region,
-		credentials: {
-			accessKeyId: this.s3accessKeyId,
-			secretAccessKey: this.s3secretAccessKey
-		}
-	});
+	constructor(private readonly configService: ConfigService) {
+		this.s3Client = new S3Client({
+			region: this.configService.get('AWS_S3_REGION'),
+			credentials: {
+				accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID') as string,
+				secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY') as string
+			}
+		});
+		console.log(this.configService.get('AWS_ACCESS_KEY_ID') as string);
+	}
 
 	async uploadAvatar(fileName: string, file: Buffer, contentType: string) {
 		try {
