@@ -30,4 +30,4 @@ jobs:
                       git pull origin production
                       npm install
                       npm run build
-                      TZ=UTC pm2 start dist/src/main.js
+                      TZ=UTC pm2 start dist/src/main.js --env .env
