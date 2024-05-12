@@ -1,9 +1,11 @@
 import { OTPEntity } from '@app/apis/user/entities/otp.entity';
+import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { IUserService } from '@app/apis/user/user.interface';
 import { randomOTP } from '@app/common';
 import { IMailService } from '@app/modules/mail';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import * as uuid from 'uuid';
 import { RegisterCommand } from '../commands/register.command';
 
 @CommandHandler(RegisterCommand)
@@ -16,37 +18,46 @@ export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
 	) {}
 
 	async execute(command: RegisterCommand) {
-		try {
-			this.logger.debug('execute');
-			const { user } = command;
-			const newUser = await this.userService.create(user);
+		this.logger.debug('execute');
+		const { user } = command;
 
-			if (newUser) {
-				let randomOtp: string = randomOTP(6);
+		const userInvite = await UserEntity.findOneBy({ inviteCode: user.inviteCode });
 
-				while (randomOtp) {
-					const opt = await OTPEntity.findOne({ where: { otp: +randomOtp } });
-					if (!opt) break;
-					randomOtp = randomOTP(6);
-				}
+		if (!userInvite) {
+			throw new BadRequestException('User Invite Not Found');
+		}
 
-				const newOTP = OTPEntity.create({
-					user: newUser,
-					otp: Number(randomOtp)
-				});
+		const id = uuid.v4();
 
-				await OTPEntity.save(newOTP);
+		const newUser = await this.userService.create({
+			...user,
+			inviteCode: id,
+			userId: userInvite.id
+		});
 
-				await this.mailService.sendOTP({
-					otp: randomOtp,
-					to: newUser.email,
-					expiresInMinute: 10
-				});
+		if (newUser) {
+			let randomOtp: string = randomOTP(6);
+
+			while (randomOtp) {
+				const opt = await OTPEntity.findOne({ where: { otp: +randomOtp } });
+				if (!opt) break;
+				randomOtp = randomOTP(6);
 			}
 
-			return newUser;
-		} catch (error) {
-			throw new BadRequestException('An error occurred. Please try again!');
+			const newOTP = OTPEntity.create({
+				user: newUser,
+				otp: Number(randomOtp)
+			});
+
+			await OTPEntity.save(newOTP);
+
+			this.mailService.sendOTP({
+				otp: randomOtp,
+				to: newUser.email,
+				expiresInMinute: 10
+			});
 		}
+
+		return newUser;
 	}
 }
