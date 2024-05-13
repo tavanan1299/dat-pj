@@ -21,10 +21,14 @@ export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
 		this.logger.debug('execute');
 		const { user } = command;
 
-		const userInvite = await UserEntity.findOneBy({ inviteCode: user.inviteCode });
+		let userInvite;
 
-		if (!userInvite) {
-			throw new BadRequestException('User Invite Not Found');
+		if (user.inviteCode) {
+			const userInvite = await UserEntity.findOneBy({ inviteCode: user.inviteCode });
+
+			if (!userInvite) {
+				throw new BadRequestException('User Invite Not Found');
+			}
 		}
 
 		const id = uuid.v4();
@@ -32,7 +36,7 @@ export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
 		const newUser = await this.userService.create({
 			...user,
 			inviteCode: id,
-			userId: userInvite.id
+			userId: userInvite?.id
 		});
 
 		if (newUser) {

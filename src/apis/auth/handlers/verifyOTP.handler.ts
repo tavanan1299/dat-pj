@@ -26,19 +26,26 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 
 			const otpBefore = await OTPEntity.findOne({
 				where: {
-					type: OTPType.CONFIRM_ACCOUNT,
 					userId: currentUser?.id,
-					expiresAt: MoreThan(new Date())
+					expiresAt: MoreThan(new Date()),
+					otp: data.otp
 				}
 			});
 
-			if (otpBefore && otpBefore.otp === data.otp) {
-				await UserEntity.save({
-					id: currentUser?.id,
+			if (otpBefore) {
+				await OTPEntity.save({
+					id: otpBefore.id,
 					isActive: true
 				});
 
-				await OTPEntity.remove(otpBefore);
+				if (otpBefore.type === OTPType.CONFIRM_ACCOUNT) {
+					await UserEntity.save({
+						id: currentUser?.id,
+						isActive: true
+					});
+
+					await OTPEntity.remove(otpBefore);
+				}
 
 				return 'Verify successfully!';
 			}
