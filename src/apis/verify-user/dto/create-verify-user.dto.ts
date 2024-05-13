@@ -8,7 +8,7 @@ export class CreateVerifyUserDto {
 	@Type(() => Date)
 	dateOfBirth!: Date;
 
-	@ApiProperty({ description: 'Phone' })
+	@ApiProperty({ description: 'Image face of user' })
 	@IsString()
 	@IsUrl(undefined, { message: 'Image is not valid.' })
 	faceID?: string;
@@ -17,8 +17,13 @@ export class CreateVerifyUserDto {
 	@IsString()
 	address?: string;
 
-	@ApiProperty({ description: 'City' })
+	@ApiProperty({ description: 'Image of front Citizen ID' })
 	@IsString()
 	@IsUrl(undefined, { message: 'Image is not valid.' })
-	citizenID?: string;
+	frontCitizenID?: string;
+
+	@ApiProperty({ description: 'Image of back Citizen ID' })
+	@IsString()
+	@IsUrl(undefined, { message: 'Image is not valid.' })
+	backCitizenID?: string;
 }

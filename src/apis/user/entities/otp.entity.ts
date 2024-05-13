@@ -13,7 +13,7 @@ export class OTPEntity extends BaseEntity {
 	type!: OTPType;
 
 	@ApiProperty({ description: 'Active' })
-	@Column({ default: true })
+	@Column({ default: false })
 	isActive!: boolean;
 
 	@Column({ nullable: true })

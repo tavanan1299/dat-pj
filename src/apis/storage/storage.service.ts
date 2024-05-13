@@ -18,7 +18,6 @@ export class StorageService {
 				secretAccessKey: this.s3SecretAccessKey
 			}
 		});
-		console.log(this.s3AccessKeyId, this.s3SecretAccessKey);
 	}
 
 	async uploadAvatar(fileName: string, file: Buffer, contentType: string) {
@@ -41,7 +40,6 @@ export class StorageService {
 				return resData;
 			}
 		} catch (e: any) {
-			console.log(e);
 			throw new BadGatewayException({
 				errorCodes: 'UPLOAD_AVATAR_FAIL',
 				description: `Something wrong when upload avatar`

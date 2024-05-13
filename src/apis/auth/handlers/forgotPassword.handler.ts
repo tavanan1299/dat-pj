@@ -43,7 +43,7 @@ export class ForgotPasswordHandler implements ICommandHandler<ForgotPasswordComm
 
 				await OTPEntity.save(newOTP);
 
-				await this.mailService.sendOTP({
+				this.mailService.sendOTP({
 					otp: randomOtp,
 					to: user.email,
 					expiresInMinute: 10

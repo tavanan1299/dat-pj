@@ -28,11 +28,12 @@ export class ResetPasswordHandler implements ICommandHandler<ResetPasswordComman
 				where: {
 					type: OTPType.FORGOT_PASSWORD,
 					userId: currentUser?.id,
-					expiresAt: MoreThan(new Date())
+					expiresAt: MoreThan(new Date()),
+					isActive: true
 				}
 			});
 
-			if (otpBefore && otpBefore.otp === data.otp) {
+			if (otpBefore) {
 				await UserEntity.save({
 					id: otpBefore.userId,
 					password: await hash(data.password)

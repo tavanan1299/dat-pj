@@ -1,6 +1,6 @@
 import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { BaseEntity } from '@common';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
 
 @Entity({ name: 'verifyUser' })
 export class VerifyUserEntity extends BaseEntity {
@@ -11,15 +11,17 @@ export class VerifyUserEntity extends BaseEntity {
 	address!: string;
 
 	@Column()
-	citizenID!: string;
+	frontCitizenID!: string;
+
+	@Column()
+	backCitizenID!: string;
 
 	@Column()
 	faceID!: string;
 
 	@Column({ nullable: true })
-	userId!: string;
+	isVerified!: boolean;
 
-	@ManyToOne(() => UserEntity, (user) => user.verify)
-	@JoinColumn({ name: 'userId', referencedColumnName: 'id' })
+	@OneToOne(() => UserEntity, (user) => user.verify)
 	user!: UserEntity;
 }
