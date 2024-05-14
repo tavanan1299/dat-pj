@@ -8,7 +8,7 @@ export class StackingEntity extends BaseEntity {
 	@Column()
 	coinName!: string;
 
-	@Column()
+	@Column({ type: 'float' })
 	quantity!: number;
 
 	@Column()
