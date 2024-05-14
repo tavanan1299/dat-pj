@@ -1,5 +1,6 @@
 import { StackingEntity } from '@app/apis/stacking/entities/stacking.entity';
 import { VerifyUserEntity } from '@app/apis/verify-user/entities/verify-user.entity';
+import { PendingWalletEntity } from '@app/apis/wallet/entities/pending-wallet.entity';
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
 import { BaseEntity } from '@common';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
@@ -29,6 +30,9 @@ export class UserEntity extends BaseEntity {
 
 	@OneToMany(() => StackingEntity, (stack) => stack.user)
 	stacks!: StackingEntity[];
+
+	@OneToMany(() => PendingWalletEntity, (pendingWallet) => pendingWallet.user)
+	pendingWallets!: PendingWalletEntity[];
 
 	@OneToMany(() => WalletEntity, (wallet) => wallet.user)
 	wallets!: WalletEntity[];
