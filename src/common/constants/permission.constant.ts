@@ -1,0 +1,4 @@
+export const PERMISSIONS = {
+	ADMIN: 'ADMIN.GRANTED',
+	BASIC: 'BASIC.PUBLIC'
+};

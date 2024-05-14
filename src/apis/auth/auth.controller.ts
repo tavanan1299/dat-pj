@@ -100,7 +100,6 @@ export class AuthController {
 
 	@ApiOperation({ description: 'Change password' })
 	@ApiOkResponse({ description: 'Change password successfully' })
-	@UseUserGuard()
 	@Post('change-password')
 	@UseUserGuard()
 	@HttpCode(200)

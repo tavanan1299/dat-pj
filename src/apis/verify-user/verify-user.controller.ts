@@ -6,6 +6,8 @@ import {
 	UseUserGuard,
 	User
 } from '@app/common';
+import { PERMISSIONS } from '@app/common/constants/permission.constant';
+import { AccessPermissions } from '@app/common/decorators/permission.decorator';
 import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
@@ -49,6 +51,7 @@ export class VerifyUserController {
 
 	@ApiOperation({ description: 'Approve verify' })
 	@ApiOkResponse({ description: 'Approve verify successfully' })
+	@AccessPermissions(PERMISSIONS.ADMIN)
 	@Get(':id/approve')
 	approveVerify(@Param('id') id: string) {
 		return this.commandBus.execute(new ApproveVerifyUserCommand({ id }));

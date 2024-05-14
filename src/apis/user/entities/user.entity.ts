@@ -1,3 +1,4 @@
+import { RoleEntity } from '@app/apis/auth/entities/role.entity';
 import { VerifyUserEntity } from '@app/apis/verify-user/entities/verify-user.entity';
 import { BaseEntity } from '@common';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
@@ -42,12 +43,19 @@ export class UserEntity extends BaseEntity {
 	@Column({ nullable: true })
 	userId!: string;
 
+	@Column()
+	roleId!: string;
+
 	@ManyToOne(() => UserEntity, (user) => user.children, { nullable: true })
 	@JoinColumn({ name: 'userId', referencedColumnName: 'id' })
 	parent!: UserEntity;
 
 	@OneToMany(() => UserEntity, (user) => user.parent, { nullable: true })
 	children!: UserEntity[];
+
+	@ManyToOne(() => RoleEntity, (role) => role.users)
+	@JoinColumn({ name: 'roleId', referencedColumnName: 'id' })
+	role!: RoleEntity;
 
 	@BeforeInsert()
 	async beforeInsert() {
