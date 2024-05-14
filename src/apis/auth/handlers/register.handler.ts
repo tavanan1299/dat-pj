@@ -2,11 +2,13 @@ import { OTPEntity } from '@app/apis/user/entities/otp.entity';
 import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { IUserService } from '@app/apis/user/user.interface';
 import { randomOTP } from '@app/common';
+import { ROLES } from '@app/common/constants/role.constant';
 import { IMailService } from '@app/modules/mail';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import * as uuid from 'uuid';
 import { RegisterCommand } from '../commands/register.command';
+import { RoleEntity } from '../entities/role.entity';
 
 @CommandHandler(RegisterCommand)
 export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
@@ -33,10 +35,13 @@ export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
 
 		const id = uuid.v4();
 
+		const basisRole = await RoleEntity.findOne({ where: { name: ROLES.BASIC } });
+
 		const newUser = await this.userService.create({
 			...user,
 			inviteCode: id,
-			userId: userInvite?.id
+			userId: userInvite?.id,
+			roleId: basisRole?.id
 		});
 
 		if (newUser) {
