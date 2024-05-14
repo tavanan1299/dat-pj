@@ -1,10 +1,11 @@
 import { UserEntity } from '@app/apis/user/entities/user.entity';
+import { CreateStackingDto } from '../dto/create-stacking.dto';
 
-export class CreateVerifyUserCommand {
+export class CreateStackingCommand {
 	user!: UserEntity;
-	data!: any;
+	data!: CreateStackingDto;
 
-	constructor(data: CreateVerifyUserCommand) {
+	constructor(data: CreateStackingCommand) {
 		Object.assign(this, data);
 	}
 }

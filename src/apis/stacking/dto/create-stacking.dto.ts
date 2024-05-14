@@ -1,16 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateStackingDto {
 	@ApiProperty({ description: 'Coin name' })
 	@IsString()
+	@IsNotEmpty()
 	coinName!: string;
 
 	@ApiProperty({ description: 'Month' })
 	@IsNumber()
-	monthSaving?: number;
+	@IsNotEmpty()
+	monthSaving!: number;
 
 	@ApiProperty({ description: 'Quantity' })
 	@IsNumber()
-	quantity?: number;
+	@IsNotEmpty()
+	quantity!: number;
+}
+
+export class CreateStackingDtoWithUserId extends CreateStackingDto {
+	userId!: string;
 }
