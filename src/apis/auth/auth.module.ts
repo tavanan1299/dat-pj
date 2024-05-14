@@ -1,11 +1,16 @@
 import { UserModule } from '@apis/user/user.module';
 import { JwtAuthGuard } from '@app/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@app/common/guards/role.guard';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity } from '../user/entities/user.entity';
 import { AuthController } from './auth.controller';
 import { IAuthService } from './auth.interface';
 import { AuthService } from './auth.service';
+import { PermissionEntity } from './entities/permission.entity';
+import { RoleEntity } from './entities/role.entity';
 import { ChangePasswordHandler } from './handlers/changePassword.handler';
 import { ForgotPasswordHandler } from './handlers/forgotPassword.handler';
 import { LoginHandler } from './handlers/login.handler';
@@ -18,7 +23,11 @@ import { UserLocalStrategy } from './strategies/local/user.local.strategy';
 import { TokenService } from './token.service';
 
 @Module({
-	imports: [PassportModule, UserModule],
+	imports: [
+		PassportModule,
+		UserModule,
+		TypeOrmModule.forFeature([UserEntity, RoleEntity, PermissionEntity])
+	],
 	controllers: [AuthController],
 	providers: [
 		{
@@ -28,6 +37,10 @@ import { TokenService } from './token.service';
 		{
 			provide: APP_GUARD,
 			useClass: JwtAuthGuard
+		},
+		{
+			provide: APP_GUARD,
+			useClass: RolesGuard
 		},
 		TokenService,
 

@@ -93,7 +93,9 @@ export class TokenService {
 	public async validateToken(token: string): Promise<{ valid: boolean }> {
 		try {
 			const { id } = await this.jwtService.verify(token);
-			const user = await UserEntity.findOne({ where: { id } });
+			const user = await UserEntity.findOne({
+				where: { id }
+			});
 			if (!user || user.isActive == false) {
 				return { valid: false };
 			}

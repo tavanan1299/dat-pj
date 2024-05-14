@@ -33,9 +33,7 @@ export class StorageService {
 			);
 			if (data.$metadata.httpStatusCode === 200) {
 				const resData = {
-					data: {
-						path: `https://${this.configService.get('AWS_S3_BUCKET_NAME')}.s3.${this.configService.get('AWS_S3_REGION')}.amazonaws.com/${key}`
-					}
+					path: `https://${this.configService.get('AWS_S3_BUCKET_NAME')}.s3.${this.configService.get('AWS_S3_REGION')}.amazonaws.com/${key}`
 				};
 				return resData;
 			}

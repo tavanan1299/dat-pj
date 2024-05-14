@@ -29,6 +29,6 @@ export class UserService extends IUserService {
 	}
 
 	async validateUserById(id: string): Promise<UserEntity> {
-		return this.getOneByIdOrFail(id);
+		return UserEntity.findOneOrFail({ where: { id }, relations: ['role', 'role.permissions'] });
 	}
 }
