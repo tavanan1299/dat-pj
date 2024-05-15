@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StackingEntity } from '../stacking/entities/stacking.entity';
 import { VerifyUserEntity } from '../verify-user/entities/verify-user.entity';
+import { PendingWalletEntity } from '../wallet/entities/pending-wallet.entity';
 import { WalletEntity } from '../wallet/entities/wallet.entity';
 import { OTPEntity } from './entities/otp.entity';
 import { ProfileEntity } from './entities/profile.entity';
@@ -26,7 +27,8 @@ import { UserService } from './user.service';
 			ProfileEntity,
 			VerifyUserEntity,
 			StackingEntity,
-			WalletEntity
+			WalletEntity,
+			PendingWalletEntity
 		])
 	],
 	controllers: [UserController],
