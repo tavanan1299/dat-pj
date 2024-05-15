@@ -45,6 +45,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 		});
 		await RefreshTokenEntity.delete({ id: In(outdatedRF.map((rf) => rf.id)) });
 
-		return data;
+		const { password, ...rest } = user;
+		return { ...rest, ...data };
 	}
 }

@@ -14,6 +14,6 @@ export class GetAllVerifyUserPaginatedHandler
 	async execute(command: GetAllVerifyUserPaginatedCommand) {
 		this.logger.log(command);
 		const { query } = command;
-		return this.verifyUserService.getAllPaginated(query);
+		return this.verifyUserService.getAllPaginated({ ...query, relations: ['user'] });
 	}
 }
