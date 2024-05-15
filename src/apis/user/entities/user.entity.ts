@@ -1,5 +1,7 @@
 import { RoleEntity } from '@app/apis/auth/entities/role.entity';
+import { StackingEntity } from '@app/apis/stacking/entities/stacking.entity';
 import { VerifyUserEntity } from '@app/apis/verify-user/entities/verify-user.entity';
+import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
 import { BaseEntity } from '@common';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { hash } from 'argon2';
@@ -25,6 +27,12 @@ export class UserEntity extends BaseEntity {
 
 	@OneToMany(() => OTPEntity, (otp) => otp.user)
 	otps!: OTPEntity[];
+
+	@OneToMany(() => StackingEntity, (stack) => stack.user)
+	stacks!: StackingEntity[];
+
+	@OneToMany(() => WalletEntity, (wallet) => wallet.user)
+	wallets!: WalletEntity[];
 
 	@OneToMany(() => RefreshTokenEntity, (rt) => rt.user)
 	rts!: RefreshTokenEntity[];
