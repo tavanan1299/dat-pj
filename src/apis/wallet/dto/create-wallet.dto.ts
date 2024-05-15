@@ -13,3 +13,7 @@ export class CreateWalletDto {
 	@IsNotEmpty()
 	quantity!: number;
 }
+
+export class CreateWalletDtoWithUserId extends CreateWalletDto {
+	userId!: string;
+}

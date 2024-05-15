@@ -1,8 +1,8 @@
 import { PaginationDto } from '@common';
-import { WalletEntity } from '../entities/wallet.entity';
+import { PendingWalletEntity } from '../entities/pending-wallet.entity';
 
 export class GetAllWalletPaginatedCommand {
-	query!: PaginationDto<WalletEntity>;
+	query!: PaginationDto<PendingWalletEntity>;
 
 	constructor(data: GetAllWalletPaginatedCommand) {
 		Object.assign(this, data);
