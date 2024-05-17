@@ -19,7 +19,7 @@ export class VerifyUserEntity extends BaseEntity {
 	@Column()
 	faceID!: string;
 
-	@Column({ nullable: true })
+	@Column({ default: false, nullable: true })
 	isVerified!: boolean;
 
 	@OneToOne(() => UserEntity, (user) => user.verify)
