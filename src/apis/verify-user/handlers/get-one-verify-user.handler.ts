@@ -12,6 +12,6 @@ export class GetOneVerifyUserByIdHandler implements ICommandHandler<GetOneVerify
 	async execute(command: GetOneVerifyUserByIdCommand) {
 		this.logger.log(command);
 		const { id } = command;
-		return this.verifyUserService.getOneByIdOrFail(id);
+		return this.verifyUserService.getOneByIdOrFail(id, { relations: ['user'] });
 	}
 }
