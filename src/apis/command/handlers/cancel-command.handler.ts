@@ -1,3 +1,4 @@
+import { ROLES } from '@app/common/constants/role.constant';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ICommand } from '../command.interface';
@@ -13,7 +14,7 @@ export class CancelCommandHandler implements ICommandHandler<CancelCommand> {
 	async execute(command: CancelCommand) {
 		this.logger.debug('execute');
 
-		const { commandId } = command;
+		const { commandId, user } = command;
 
 		try {
 			const curentCommand = await CommandEntity.findOneBy({
@@ -24,9 +25,12 @@ export class CancelCommandHandler implements ICommandHandler<CancelCommand> {
 				throw new BadRequestException('Command not found');
 			}
 
-			await CommandEntity.remove(curentCommand);
+			if (curentCommand.userId === user.id || user.role.name === ROLES.ADMIN) {
+				await CommandEntity.remove(curentCommand);
+				return 'Cancel Command successfully';
+			}
 
-			return 'Cancel Command successfully';
+			throw new BadRequestException('Access denied');
 		} catch (error) {
 			throw error;
 		}
