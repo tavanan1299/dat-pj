@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
 import { UserEntity } from '../user/entities/user.entity';
 import { VerifyUserEntity } from '../verify-user/entities/verify-user.entity';
 import { PendingWalletEntity } from './entities/pending-wallet.entity';
@@ -15,7 +16,13 @@ import { WalletService } from './wallet.service';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([UserEntity, VerifyUserEntity, WalletEntity, PendingWalletEntity])
+		TypeOrmModule.forFeature([
+			UserEntity,
+			VerifyUserEntity,
+			WalletEntity,
+			PendingWalletEntity,
+			WalletLogEntity
+		])
 	],
 	controllers: [WalletController],
 	providers: [

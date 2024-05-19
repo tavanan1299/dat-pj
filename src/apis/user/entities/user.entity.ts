@@ -1,4 +1,5 @@
 import { RoleEntity } from '@app/apis/auth/entities/role.entity';
+import { MarketLogEntity } from '@app/apis/market/entities/market-log.entity';
 import { StackingEntity } from '@app/apis/stacking/entities/stacking.entity';
 import { VerifyUserEntity } from '@app/apis/verify-user/entities/verify-user.entity';
 import { PendingWalletEntity } from '@app/apis/wallet/entities/pending-wallet.entity';
@@ -37,6 +38,9 @@ export class UserEntity extends BaseEntity {
 
 	@OneToMany(() => WalletEntity, (wallet) => wallet.user)
 	wallets!: WalletEntity[];
+
+	@OneToMany(() => MarketLogEntity, (marketLog) => marketLog.user)
+	marketLogs!: MarketLogEntity[];
 
 	@OneToMany(() => RefreshTokenEntity, (rt) => rt.user)
 	rts!: RefreshTokenEntity[];
