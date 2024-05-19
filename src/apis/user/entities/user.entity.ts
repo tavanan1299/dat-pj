@@ -1,4 +1,5 @@
 import { RoleEntity } from '@app/apis/auth/entities/role.entity';
+import { CommandEntity } from '@app/apis/command/entities/command.entity';
 import { StackingEntity } from '@app/apis/stacking/entities/stacking.entity';
 import { VerifyUserEntity } from '@app/apis/verify-user/entities/verify-user.entity';
 import { PendingWalletEntity } from '@app/apis/wallet/entities/pending-wallet.entity';
@@ -31,6 +32,9 @@ export class UserEntity extends BaseEntity {
 
 	@OneToMany(() => StackingEntity, (stack) => stack.user)
 	stacks!: StackingEntity[];
+
+	@OneToMany(() => CommandEntity, (command) => command.user)
+	commands!: CommandEntity[];
 
 	@OneToMany(() => PendingWalletEntity, (pendingWallet) => pendingWallet.user)
 	pendingWallets!: PendingWalletEntity[];
