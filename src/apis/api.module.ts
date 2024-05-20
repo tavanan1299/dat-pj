@@ -7,6 +7,7 @@ import { StorageModule } from './storage/storage.module';
 import { UserModule } from './user/user.module';
 import { VerifyUserModule } from './verify-user/verify-user.module';
 import { WalletModule } from './wallet/wallet.module';
+import { CommandModule } from './command/command.module';
 
 @Module({
 	imports: [
@@ -17,7 +18,8 @@ import { WalletModule } from './wallet/wallet.module';
 		VerifyUserModule,
 		StackingModule,
 		WalletModule,
-		MarketLogModule
+		MarketLogModule,
+		CommandModule
 	]
 })
 export class ApiModule {}
