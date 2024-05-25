@@ -1,14 +1,22 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommandController } from './command.controller';
 import { ICommand } from './command.interface';
+import { CommandProcessor } from './command.processor';
 import { CommandService } from './command.service';
 import { CommandEntity } from './entities/command.entity';
 import { CancelCommandHandler } from './handlers/cancel-command.handler';
 import { CreateCommandHandler } from './handlers/create-command.handler';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([CommandEntity])],
+	imports: [
+		TypeOrmModule.forFeature([CommandEntity]),
+		BullModule.registerQueue({
+			name: 'binance:coin',
+			prefix: 'trade-coin'
+		})
+	],
 	controllers: [CommandController],
 	providers: [
 		{
@@ -16,7 +24,8 @@ import { CreateCommandHandler } from './handlers/create-command.handler';
 			useClass: CommandService
 		},
 		CreateCommandHandler,
-		CancelCommandHandler
+		CancelCommandHandler,
+		CommandProcessor
 	],
 	exports: [ICommand]
 })

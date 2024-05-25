@@ -10,6 +10,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { providers } from './app.provider';
+import { QueueModule } from './modules/bull/bull.module';
 
 @Module({
 	imports: [
@@ -21,6 +22,7 @@ import { providers } from './app.provider';
 			maxListeners: 20
 		}),
 		I18NModule,
+		QueueModule,
 		CqrsModule.forRoot(),
 		ApiModule
 	],
