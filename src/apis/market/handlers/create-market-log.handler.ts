@@ -1,5 +1,6 @@
 import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
+import { MarketLogStatus, MarketLogType } from '@app/common/enums/status.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectEntityManager } from '@nestjs/typeorm';
@@ -57,7 +58,9 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 					quantity: data.quantity,
 					currentPrice: data.currentPrice,
 					totalPay: data.totalPay,
-					userId: currentUser.id
+					userId: currentUser.id,
+					type: MarketLogType.MARKET,
+					status: MarketLogStatus.SUCCESS
 				});
 
 				await MarketLogEntity.save(newMarketLog);

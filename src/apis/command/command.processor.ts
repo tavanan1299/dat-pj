@@ -1,8 +1,9 @@
-import { CommandType } from '@app/common/enums/status.enum';
+import { CommandType, MarketLogStatus, MarketLogType } from '@app/common/enums/status.enum';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { MarketLogEntity } from '../market/entities/market-log.entity';
 import { WalletEntity } from '../wallet/entities/wallet.entity';
 import { CommandEntity } from './entities/command.entity';
 
@@ -29,21 +30,24 @@ export class CommandProcessor extends WorkerHost {
 	async matchCommand(data: Record<string, any>) {
 		this.logger.log('Processing match command....');
 		const matchSellData = await this.entityManager.getRepository(CommandEntity).find({
-			where: [
-				{
-					type: CommandType.SELL,
-					coinName: this.USDT2CoinName(data.s),
-					expectPrice: LessThanOrEqual(data.p)
-				},
-				{
-					type: CommandType.SELL,
-					coinName: this.USDT2CoinName(data.s),
-					lossStopPrice: MoreThanOrEqual(data.p)
-				}
-			]
+			where: {
+				type: CommandType.SELL,
+				coinName: this.USDT2CoinName(data.s),
+				expectPrice: LessThanOrEqual(data.p)
+			}
 		});
 
-		this.handleSell(matchSellData);
+		await this.handleSell(matchSellData);
+
+		const matchSellLostStopData = await this.entityManager.getRepository(CommandEntity).find({
+			where: {
+				type: CommandType.SELL,
+				coinName: this.USDT2CoinName(data.s),
+				lossStopPrice: MoreThanOrEqual(data.p)
+			}
+		});
+
+		await this.handleSell(matchSellLostStopData, true);
 
 		const matchBuyData = await this.entityManager.getRepository(CommandEntity).find({
 			where: {
@@ -58,7 +62,7 @@ export class CommandProcessor extends WorkerHost {
 		return;
 	}
 
-	async handleSell(data: Record<string, any>[]) {
+	async handleSell(data: Record<string, any>[], isLostStop = false) {
 		await Promise.all(
 			data.map((command) =>
 				this.entityManager.transaction(async (trx) => {
@@ -79,8 +83,18 @@ export class CommandProcessor extends WorkerHost {
 
 					if (wallet && wallet?.quantity < command.quantity) {
 						await trx.getRepository(CommandEntity).delete(command.id);
-						// add fail log
 
+						// add fail log
+						await trx.getRepository(MarketLogEntity).save({
+							coinName: command.coinName,
+							quantity: command.quantity,
+							currentPrice: isLostStop ? command.lossStopPrice : command.expectPrice,
+							totalPay: command.totalPay,
+							userId: command.userId,
+							type: MarketLogType.COMMAND_SELL,
+							status: MarketLogStatus.FAIL,
+							desc: 'Wallet balance is not enough'
+						});
 						return;
 					}
 
@@ -92,6 +106,15 @@ export class CommandProcessor extends WorkerHost {
 					await trx.getRepository(CommandEntity).delete(command.id);
 
 					// add logs
+					await trx.getRepository(MarketLogEntity).save({
+						coinName: command.coinName,
+						quantity: command.quantity,
+						currentPrice: isLostStop ? command.lossStopPrice : command.expectPrice,
+						totalPay: command.totalPay,
+						userId: command.userId,
+						type: MarketLogType.COMMAND_SELL,
+						status: MarketLogStatus.SUCCESS
+					});
 
 					return;
 				})
@@ -122,12 +145,21 @@ export class CommandProcessor extends WorkerHost {
 
 					await trx.getRepository(WalletEntity).save({
 						...wallet,
-						quantity: wallet?.quantity + command.quantity
+						quantity: +wallet?.quantity + +command.quantity
 					});
 
 					await trx.getRepository(CommandEntity).delete(command.id);
 
 					// add logs
+					await trx.getRepository(MarketLogEntity).save({
+						coinName: command.coinName,
+						quantity: command.quantity,
+						currentPrice: command.expectPrice,
+						totalPay: command.totalPay,
+						userId: command.userId,
+						type: MarketLogType.COMMAND_BUY,
+						status: MarketLogStatus.SUCCESS
+					});
 				})
 			)
 		);
