@@ -1,3 +1,4 @@
+import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.entity';
 import { WalletStatus, WalletType } from '@app/common/enums/wallet.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -17,41 +18,44 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 		@InjectEntityManager()
 		private readonly entityManager: EntityManager
 	) {}
-
 	async execute(command: ApprovePendingWalletCommand) {
-		this.logger.log(command);
-		const { id } = command;
+		try {
+			this.logger.log(command);
+			const { id } = command;
 
-		const pendingWallet = await PendingWalletEntity.findOne({ where: { id } });
-		if (!pendingWallet) {
-			throw new BadRequestException('No request found');
-		}
-
-		if (pendingWallet.status === WalletStatus.APPROVE) {
-			throw new BadRequestException('Request already approved');
-		}
-
-		let wallet = await WalletEntity.findOne({
-			where: {
-				userId: pendingWallet.userId,
-				coinName: pendingWallet.coinName
+			const pendingWallet = await PendingWalletEntity.findOne({ where: { id } });
+			if (!pendingWallet) {
+				throw new BadRequestException('No request found');
 			}
-		});
 
-		if (!wallet) {
-			const newWallet = WalletEntity.create({
-				userId: pendingWallet.userId,
-				coinName: pendingWallet.coinName,
-				quantity: 0
+			if (pendingWallet.status === WalletStatus.APPROVE) {
+				throw new BadRequestException('Request already approved');
+			}
+
+			let wallet = await WalletEntity.findOne({
+				where: {
+					userId: pendingWallet.userId,
+					coinName: pendingWallet.coinName
+				}
 			});
 
-			wallet = await WalletEntity.save(newWallet);
-		}
+			if (!wallet) {
+				const newWallet = WalletEntity.create({
+					userId: pendingWallet.userId,
+					coinName: pendingWallet.coinName,
+					quantity: 0
+				});
 
-		if (pendingWallet.type === WalletType.WITHDRAW) {
-			return this.withdrawWallet(wallet, pendingWallet);
-		} else {
-			return this.depositWallet(wallet, pendingWallet);
+				wallet = await WalletEntity.save(newWallet);
+			}
+
+			if (pendingWallet.type === WalletType.WITHDRAW) {
+				return this.withdrawWallet(wallet, pendingWallet);
+			} else {
+				return this.depositWallet(wallet, pendingWallet);
+			}
+		} catch (error) {
+			console.log(error);
 		}
 	}
 
@@ -68,6 +72,14 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 				...wallet,
 				quantity: wallet?.quantity - pendingWallet.quantity
 			});
+			await trx.getRepository(WalletLogEntity).save({
+				userId: pendingWallet.userId,
+				walletId: wallet.id,
+				coinName: pendingWallet.coinName,
+				quantity: pendingWallet.quantity,
+				remainBalance: wallet?.quantity - pendingWallet.quantity,
+				type: 'withdraw'
+			});
 		});
 
 		return 'Withdraw success';
@@ -81,6 +93,14 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 			await trx.getRepository(WalletEntity).save({
 				...wallet,
 				quantity: wallet?.quantity + pendingWallet.quantity
+			});
+			await trx.getRepository(WalletLogEntity).save({
+				userId: pendingWallet.userId,
+				walletId: wallet.id,
+				coinName: pendingWallet.coinName,
+				quantity: pendingWallet.quantity,
+				remainBalance: wallet?.quantity + pendingWallet.quantity,
+				type: 'deposit'
 			});
 		});
 
