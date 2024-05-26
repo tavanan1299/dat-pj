@@ -16,9 +16,9 @@ export class CommandProcessor extends WorkerHost {
 
 	async process(job: Job<any, any, string>): Promise<any> {
 		switch (job.name) {
-			case 'addBinanceJob':
+			case 'coinPrice':
+				// console.log(job.data);
 				const data = await this.matchCommand(job.data);
-				console.log({ data });
 				return data;
 
 			default:
@@ -32,13 +32,13 @@ export class CommandProcessor extends WorkerHost {
 			where: [
 				{
 					type: CommandType.SELL,
-					coinName: this.USTD2CoinName(data.s),
-					expectPrice: MoreThanOrEqual(data.p)
+					coinName: this.USDT2CoinName(data.s),
+					expectPrice: LessThanOrEqual(data.p)
 				},
 				{
 					type: CommandType.SELL,
-					coinName: this.USTD2CoinName(data.s),
-					lossStopPrice: LessThanOrEqual(data.p)
+					coinName: this.USDT2CoinName(data.s),
+					lossStopPrice: MoreThanOrEqual(data.p)
 				}
 			]
 		});
@@ -48,12 +48,12 @@ export class CommandProcessor extends WorkerHost {
 		const matchBuyData = await this.entityManager.getRepository(CommandEntity).find({
 			where: {
 				type: CommandType.BUY,
-				coinName: this.USTD2CoinName(data.s),
-				expectPrice: LessThanOrEqual(data.p)
+				coinName: this.USDT2CoinName(data.s),
+				expectPrice: MoreThanOrEqual(data.p)
 			}
 		});
 
-		this.handleSell(matchBuyData);
+		await this.handleBuy(matchBuyData);
 
 		return;
 	}
@@ -70,9 +70,11 @@ export class CommandProcessor extends WorkerHost {
 					});
 
 					if (!wallet) {
-						wallet = await trx
-							.getRepository(WalletEntity)
-							.save({ coinName: command.coinName, quantity: 0 });
+						wallet = await trx.getRepository(WalletEntity).save({
+							userId: command.userId,
+							coinName: command.coinName,
+							quantity: 0
+						});
 					}
 
 					if (wallet && wallet?.quantity < command.quantity) {
@@ -84,7 +86,7 @@ export class CommandProcessor extends WorkerHost {
 
 					await trx.getRepository(WalletEntity).save({
 						...wallet,
-						quantity: wallet?.quantity - command.quantity
+						quantity: +wallet?.quantity - +command.quantity
 					});
 
 					await trx.getRepository(CommandEntity).delete(command.id);
@@ -111,9 +113,11 @@ export class CommandProcessor extends WorkerHost {
 					});
 
 					if (!wallet) {
-						wallet = await trx
-							.getRepository(WalletEntity)
-							.save({ coinName: command.coinName, quantity: 0 });
+						wallet = await trx.getRepository(WalletEntity).save({
+							userId: command.userId,
+							coinName: command.coinName,
+							quantity: 0
+						});
 					}
 
 					await trx.getRepository(WalletEntity).save({
@@ -131,11 +135,11 @@ export class CommandProcessor extends WorkerHost {
 		return;
 	}
 
-	private coinName2USTD(name: string) {
-		return `${name.toUpperCase()}USTD`;
+	private coinName2USDT(name: string) {
+		return `${name.toUpperCase()}USDT`;
 	}
 
-	private USTD2CoinName(name: string) {
-		return name.replace('USTD', '').toLowerCase();
+	private USDT2CoinName(name: string) {
+		return name.replaceAll('USDT', '').toLowerCase();
 	}
 }

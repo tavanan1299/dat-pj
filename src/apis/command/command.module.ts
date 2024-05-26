@@ -1,4 +1,3 @@
-import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommandController } from './command.controller';
@@ -10,13 +9,7 @@ import { CancelCommandHandler } from './handlers/cancel-command.handler';
 import { CreateCommandHandler } from './handlers/create-command.handler';
 
 @Module({
-	imports: [
-		TypeOrmModule.forFeature([CommandEntity]),
-		BullModule.registerQueue({
-			name: 'binance:coin',
-			prefix: 'trade-coin'
-		})
-	],
+	imports: [TypeOrmModule.forFeature([CommandEntity])],
 	controllers: [CommandController],
 	providers: [
 		{

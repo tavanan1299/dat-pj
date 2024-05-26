@@ -5,6 +5,7 @@ import { CronModule } from '@modules/cron';
 import { DatabaseModule } from '@modules/database';
 import { I18NModule } from '@modules/i18n';
 import { JwtModule } from '@modules/jwt';
+import { BullModule } from '@nestjs/bullmq';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -24,7 +25,11 @@ import { QueueModule } from './modules/bull/bull.module';
 		I18NModule,
 		QueueModule,
 		CqrsModule.forRoot(),
-		ApiModule
+		ApiModule,
+		BullModule.registerQueue({
+			name: 'binance:coin',
+			prefix: 'trade-coin'
+		})
 	],
 	controllers: [AppController],
 	providers

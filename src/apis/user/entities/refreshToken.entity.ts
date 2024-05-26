@@ -1,7 +1,7 @@
 import { BaseEntity } from '@common';
-import * as sha1 from 'sha1';
 import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { UserEntity } from './user.entity';
+const sha1 = require('sha1');
 
 @Entity({ name: 'refreshToken' })
 export class RefreshTokenEntity extends BaseEntity {
