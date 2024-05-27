@@ -98,7 +98,7 @@ export class CommandProcessor extends WorkerHost {
 						return;
 					}
 
-					await trx.getRepository(WalletEntity).save({
+					await trx.getRepository(WalletEntity).update(wallet.id, {
 						...wallet,
 						quantity: +wallet?.quantity - +command.quantity
 					});
@@ -143,7 +143,7 @@ export class CommandProcessor extends WorkerHost {
 						});
 					}
 
-					await trx.getRepository(WalletEntity).save({
+					await trx.getRepository(WalletEntity).update(wallet.id, {
 						...wallet,
 						quantity: +wallet?.quantity + +command.quantity
 					});
