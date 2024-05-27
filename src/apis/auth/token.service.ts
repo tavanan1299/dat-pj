@@ -8,10 +8,10 @@ import {
 import { IJwtService } from '@app/modules/jwt';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as sha1 from 'sha1';
 import { RefreshTokenEntity } from '../user/entities/refreshToken.entity';
 import { UserEntity } from '../user/entities/user.entity';
 import { TokenDto } from './dto/token.dto';
+const sha1 = require('sha1');
 
 @Injectable()
 export class TokenService {

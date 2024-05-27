@@ -2,9 +2,9 @@ import { RefreshTokenEntity } from '@app/apis/user/entities/refreshToken.entity'
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import * as sha1 from 'sha1';
 import { In, LessThanOrEqual } from 'typeorm';
 import { LogoutCommand } from '../commands/logout.command';
+const sha1 = require('sha1');
 
 @CommandHandler(LogoutCommand)
 export class LogoutHandler implements ICommandHandler<LogoutCommand> {
