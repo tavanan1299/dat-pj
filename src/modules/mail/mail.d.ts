@@ -10,7 +10,15 @@ declare global {
 		expiresInMinute: number;
 	};
 
+	type GetTransferTemplatePayload = {
+		coinName: string;
+		quantity: number;
+		type: string;
+	};
+
 	type SendOTPPayload = SendMailPayload & GetOTPTemplatePayload;
+
+	type SendTransferPayload = SendMailPayload & GetTransferTemplatePayload;
 }
 
 export {};

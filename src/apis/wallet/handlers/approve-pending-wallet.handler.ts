@@ -1,4 +1,5 @@
 import { WalletStatus, WalletType } from '@app/common/enums/wallet.enum';
+import { IMailService } from '@app/modules/mail';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectEntityManager } from '@nestjs/typeorm';
@@ -15,7 +16,8 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 	constructor(
 		private readonly pendingWallet: IPendingWallet,
 		@InjectEntityManager()
-		private readonly entityManager: EntityManager
+		private readonly entityManager: EntityManager,
+		private readonly mailService: IMailService
 	) {}
 
 	async execute(command: ApprovePendingWalletCommand) {
@@ -60,28 +62,45 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 			throw new BadRequestException('Your wallet is not enough');
 		}
 
+		const walletQuantityWithdraw = wallet?.quantity - pendingWallet.quantity;
+
 		await this.entityManager.transaction(async (trx) => {
 			await trx
 				.getRepository(PendingWalletEntity)
 				.save({ ...pendingWallet, status: WalletStatus.APPROVE });
 			await trx.getRepository(WalletEntity).save({
 				...wallet,
-				quantity: wallet?.quantity - pendingWallet.quantity
+				quantity: walletQuantityWithdraw
 			});
+		});
+
+		this.mailService.sendTransfer({
+			coinName: pendingWallet.coinName,
+			to: 'trongdv1999@gmail.com',
+			quantity: pendingWallet.quantity,
+			type: 'withdraw'
 		});
 
 		return 'Withdraw success';
 	}
 
 	private async depositWallet(wallet: WalletEntity, pendingWallet: PendingWalletEntity) {
+		const walletQuantityDeposit = wallet?.quantity + pendingWallet.quantity;
 		await this.entityManager.transaction(async (trx) => {
 			await trx
 				.getRepository(PendingWalletEntity)
 				.save({ ...pendingWallet, status: WalletStatus.APPROVE });
 			await trx.getRepository(WalletEntity).save({
 				...wallet,
-				quantity: wallet?.quantity + pendingWallet.quantity
+				quantity: walletQuantityDeposit
 			});
+		});
+
+		this.mailService.sendTransfer({
+			coinName: pendingWallet.coinName,
+			to: 'trongdv1999@gmail.com',
+			quantity: pendingWallet.quantity,
+			type: 'deposit'
 		});
 
 		return 'Deposit success';

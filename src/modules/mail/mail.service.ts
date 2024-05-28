@@ -2,7 +2,7 @@ import { MetadataKey } from '@common';
 import { Inject, Injectable } from '@nestjs/common';
 import { Transporter } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import { getOtpTemplate } from './mail.helper';
+import { getOtpTemplate, getTransferTemplate } from './mail.helper';
 import { IMailService } from './mail.interface';
 
 @Injectable()
@@ -23,6 +23,15 @@ export class MailService extends IMailService {
 		return this.sendMail({
 			...payload,
 			subject: 'Verify Account',
+			html: template
+		});
+	}
+
+	async sendTransfer(payload: SendTransferPayload) {
+		const template = getTransferTemplate(payload);
+		return this.sendMail({
+			...payload,
+			subject: 'Transfer',
 			html: template
 		});
 	}
