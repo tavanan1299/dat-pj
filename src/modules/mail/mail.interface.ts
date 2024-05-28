@@ -6,4 +6,12 @@ export abstract class IMailService {
      * @example this.mailService.sendOTP(payload);
      */
     abstract sendOTP(payload: SendOTPPayload): Promise<any>;
+
+    /**
+     * Send email transfer
+     * @param payload Payload send email transfer
+     * @return Promise<any>
+     * @example this.mailService.sendTransfer(payload);
+     */
+    abstract sendTransfer(payload: SendTransferPayload): Promise<any>;
 }
