@@ -1,5 +1,6 @@
+import { MarketLogType } from '@app/common/enums/status.enum';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateMarketLogDto {
 	@ApiProperty({ description: 'Coin name' })
@@ -21,4 +22,13 @@ export class CreateMarketLogDto {
 	@IsNumber()
 	@IsNotEmpty()
 	totalPay!: number;
+
+	@ApiProperty({
+		description: 'Type of transfer',
+		example: `${MarketLogType.MARKET_BUY}|${MarketLogType.MARKET_SELL}`
+	})
+	@IsString()
+	@IsNotEmpty()
+	@IsEnum(MarketLogType)
+	type!: MarketLogType;
 }

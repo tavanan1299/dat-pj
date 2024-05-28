@@ -14,7 +14,8 @@ export enum MarketLogStatus {
 }
 
 export enum MarketLogType {
-	MARKET = 'market',
+	MARKET_BUY = 'market_buy',
+	MARKET_SELL = 'market_sell',
 	COMMAND_SELL = 'command_sell',
 	COMMAND_BUY = 'command_buy'
 }
