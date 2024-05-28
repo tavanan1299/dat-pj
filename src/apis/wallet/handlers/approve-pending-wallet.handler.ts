@@ -1,6 +1,8 @@
+import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { WalletStatus, WalletType } from '@app/common/enums/wallet.enum';
 import { IMailService } from '@app/modules/mail';
 import { BadRequestException, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
@@ -17,7 +19,8 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 		private readonly pendingWallet: IPendingWallet,
 		@InjectEntityManager()
 		private readonly entityManager: EntityManager,
-		private readonly mailService: IMailService
+		private readonly mailService: IMailService,
+		private configService: ConfigService
 	) {}
 
 	async execute(command: ApprovePendingWalletCommand) {
@@ -62,6 +65,12 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 			throw new BadRequestException('Your wallet is not enough');
 		}
 
+		const currentUser = await UserEntity.findOne({
+			where: {
+				id: pendingWallet.userId
+			}
+		});
+
 		const walletQuantityWithdraw = wallet?.quantity - pendingWallet.quantity;
 
 		await this.entityManager.transaction(async (trx) => {
@@ -76,9 +85,11 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 
 		this.mailService.sendTransfer({
 			coinName: pendingWallet.coinName,
-			to: 'trongdv1999@gmail.com',
+			to: this.configService.get('MAIL_DEFAULT')!,
 			quantity: pendingWallet.quantity,
-			type: 'withdraw'
+			type: WalletType.WITHDRAW,
+			userId: pendingWallet.userId,
+			email: currentUser!.email
 		});
 
 		return 'Withdraw success';
@@ -86,6 +97,12 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 
 	private async depositWallet(wallet: WalletEntity, pendingWallet: PendingWalletEntity) {
 		const walletQuantityDeposit = wallet?.quantity + pendingWallet.quantity;
+		const currentUser = await UserEntity.findOne({
+			where: {
+				id: pendingWallet.userId
+			}
+		});
+
 		await this.entityManager.transaction(async (trx) => {
 			await trx
 				.getRepository(PendingWalletEntity)
@@ -98,9 +115,11 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 
 		this.mailService.sendTransfer({
 			coinName: pendingWallet.coinName,
-			to: 'trongdv1999@gmail.com',
+			to: this.configService.get('MAIL_DEFAULT')!,
 			quantity: pendingWallet.quantity,
-			type: 'deposit'
+			type: WalletType.DEPOSIT,
+			userId: pendingWallet.userId,
+			email: currentUser!.email
 		});
 
 		return 'Deposit success';

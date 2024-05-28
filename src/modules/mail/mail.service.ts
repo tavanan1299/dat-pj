@@ -31,7 +31,7 @@ export class MailService extends IMailService {
 		const template = getTransferTemplate(payload);
 		return this.sendMail({
 			...payload,
-			subject: 'Transfer',
+			subject: 'Remind transaction',
 			html: template
 		});
 	}

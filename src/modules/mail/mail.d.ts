@@ -14,6 +14,8 @@ declare global {
 		coinName: string;
 		quantity: number;
 		type: string;
+		userId: string;
+		email: string;
 	};
 
 	type SendOTPPayload = SendMailPayload & GetOTPTemplatePayload;
