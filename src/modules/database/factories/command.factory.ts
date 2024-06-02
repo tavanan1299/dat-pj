@@ -120,7 +120,7 @@ export const CommandsFactory = setSeederFactory(CommandEntity, () => {
 	command.quantity = Math.floor(Math.random() * 1000);
 	command.type = commandType;
 	command.totalPay = Math.floor(Math.random() * 100000);
-	command.userId = '15160d40-26ae-453a-90d5-2267824e8b51';
+	command.userId = 'a1e9ce39-cf45-4871-8541-cfa73ef97559';
 
 	if (commandType === CommandType.SELL) {
 		command.lossStopPrice = Math.floor(Math.random() * expectPrice);
