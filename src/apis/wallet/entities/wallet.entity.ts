@@ -12,6 +12,9 @@ export class WalletEntity extends BaseEntity {
 	quantity!: number;
 
 	@Column({ nullable: true })
+	network!: string;
+
+	@Column({ nullable: true })
 	userId!: string;
 
 	@ManyToOne(() => UserEntity, (user) => user.wallets)
