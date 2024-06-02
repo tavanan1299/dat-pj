@@ -49,7 +49,6 @@ export class CreateVerifyUserHandler implements ICommandHandler<CreateStackingCo
 
 				return 'Create Stacking successfully';
 			} catch (error) {
-				console.log(error);
 				throw error;
 			}
 		});

@@ -4,6 +4,8 @@ import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
 import { AppService } from './app.service';
 import { TypeOrmFilter } from './common/filters/typeorm.filter';
 import { FormatResponseInterceptor } from './common/interceptors/format-response.interceptor';
+import { BinanceGateway } from './modules/socket/binance.gateway';
+import { BinanceService } from './modules/socket/binance.service';
 import { ExistsValidator } from './validators/exists.validator';
 
 export const providers: Provider[] = [
@@ -52,5 +54,7 @@ export const providers: Provider[] = [
 				}
 			});
 		}
-	}
+	},
+	BinanceGateway,
+	BinanceService
 ];
