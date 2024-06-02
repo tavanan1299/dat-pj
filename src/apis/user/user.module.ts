@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ICommand } from '../command/command.interface';
+import { CommandService } from '../command/command.service';
+import { CommandEntity } from '../command/entities/command.entity';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
 import { IWalletLog } from '../log/wallet-log/wallet-log.interface';
 import { WalletLogService } from '../log/wallet-log/wallet-log.service';
@@ -16,6 +19,7 @@ import { RefreshTokenEntity } from './entities/refreshToken.entity';
 import { UserEntity } from './entities/user.entity';
 import { CreateUserHandler } from './handlers/create-user.handler';
 import { GetAllUserPaginatedHandler } from './handlers/get-all-user-paginated.handler';
+import { GetMyCommandHandler } from './handlers/get-my-command.handler';
 import { GetMyStacksHandler } from './handlers/get-my-stacks.handler';
 import { GetMyTransHistoriesHandler } from './handlers/get-my-trans-histories.handler';
 import { GetOneUserByIdHandler } from './handlers/get-one-user-by-id.handler';
@@ -38,7 +42,8 @@ import { UserService } from './user.service';
 			WalletEntity,
 			PendingWalletEntity,
 			MarketLogEntity,
-			WalletLogEntity
+			WalletLogEntity,
+			CommandEntity
 		])
 	],
 	controllers: [UserController],
@@ -55,6 +60,10 @@ import { UserService } from './user.service';
 			provide: IStacking,
 			useClass: StackingService
 		},
+		{
+			provide: ICommand,
+			useClass: CommandService
+		},
 		CreateUserHandler,
 		GetAllUserPaginatedHandler,
 		GetOneUserByIdHandler,
@@ -62,7 +71,8 @@ import { UserService } from './user.service';
 		UpdateUserByIdHandler,
 		UpsertHandler,
 		GetMyTransHistoriesHandler,
-		GetMyStacksHandler
+		GetMyStacksHandler,
+		GetMyCommandHandler
 	],
 	exports: [IUserService]
 })

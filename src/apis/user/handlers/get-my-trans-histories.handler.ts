@@ -15,6 +15,7 @@ export class GetMyTransHistoriesHandler implements ICommandHandler<GetMyTransHis
 		const queryParams: any = { ...query };
 
 		queryParams.where = { userId: user.id };
+		queryParams.order = { createdAt: 'DESC' };
 		return this.walletLogService.getAllPaginated(queryParams);
 	}
 }
