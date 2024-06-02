@@ -1,4 +1,5 @@
 import { CommandType, MarketLogStatus, MarketLogType } from '@app/common/enums/status.enum';
+import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
@@ -120,9 +121,9 @@ export class CommandProcessor extends WorkerHost {
 					userId: wallet.userId,
 					walletId: wallet.id,
 					coinName: wallet.coinName,
-					quantity: wallet.quantity,
+					quantity: command.quantity,
 					remainBalance: +wallet?.quantity - +command.quantity,
-					type: 'command_sell'
+					type: WalletLogType.COMMAND_SELL
 				});
 
 				return;
@@ -172,9 +173,9 @@ export class CommandProcessor extends WorkerHost {
 					userId: wallet.userId,
 					walletId: wallet.id,
 					coinName: wallet.coinName,
-					quantity: wallet.quantity,
+					quantity: command.quantity,
 					remainBalance: +wallet?.quantity + +command.quantity,
-					type: 'command_buy'
+					type: WalletLogType.COMMAND_BUY
 				});
 			});
 		}

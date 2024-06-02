@@ -2,6 +2,7 @@ import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.en
 import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
 import { MarketLogStatus, MarketLogType } from '@app/common/enums/status.enum';
+import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectEntityManager } from '@nestjs/typeorm';
@@ -74,7 +75,7 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 								remainBalance: +currentWallet?.quantity + +data.quantity,
 								userId: currentUser.id,
 								walletId: currentWallet.id,
-								type: MarketLogType.MARKET_BUY
+								type: WalletLogType.MARKET_BUY
 							})
 						);
 					});
@@ -112,7 +113,7 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 								remainBalance: +currentWallet?.quantity - +data.quantity,
 								userId: currentUser.id,
 								walletId: currentWallet.id,
-								type: MarketLogType.MARKET_SELL
+								type: WalletLogType.MARKET_SELL
 							})
 						);
 					});
