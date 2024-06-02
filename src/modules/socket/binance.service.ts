@@ -20,7 +20,6 @@ export class BinanceService {
 
 		ws.onmessage = (event) => {
 			this.binanceCoin.add('coinPrice', JSON.parse(event.data));
-			// console.log(JSON.parse(event.data));
 		};
 
 		ws.on('error', (error) => {
@@ -46,7 +45,9 @@ export class BinanceService {
 			.distinctOn(['command.coinName'])
 			.getMany();
 
-		this.coins = data.map((item) => `${item.coinName}usdt@markPrice`);
+		this.coins = data.length
+			? data.map((item) => `${item.coinName}usdt@markPrice`)
+			: ['btcusdt@markPrice'];
 		return;
 	}
 }

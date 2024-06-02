@@ -1,5 +1,6 @@
 import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.entity';
 import { WalletStatus, WalletType } from '@app/common/enums/wallet.enum';
+import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectEntityManager } from '@nestjs/typeorm';
@@ -78,7 +79,7 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 				coinName: pendingWallet.coinName,
 				quantity: pendingWallet.quantity,
 				remainBalance: wallet?.quantity - pendingWallet.quantity,
-				type: 'withdraw'
+				type: WalletLogType.WITHDRAW
 			});
 		});
 
@@ -100,7 +101,7 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 				coinName: pendingWallet.coinName,
 				quantity: pendingWallet.quantity,
 				remainBalance: wallet?.quantity + pendingWallet.quantity,
-				type: 'deposit'
+				type: WalletLogType.DEPOSIT
 			});
 		});
 

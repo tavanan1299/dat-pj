@@ -40,15 +40,15 @@ services:
             - .docker/redis:/data
         restart: unless-stopped
 
-    redis_commander:
-        container_name: redis_commander
-        image: rediscommander/redis-commander:latest
-        environment:
-            - REDIS_HOSTS=local:redis:6379
-        ports:
-            - '8088:8081'
-        depends_on:
-            - redis
+    # redis_commander:
+    #     container_name: redis_commander
+    #     image: rediscommander/redis-commander:latest
+    #     environment:
+    #         - REDIS_HOSTS=local:redis:6379
+    #     ports:
+    #         - '8088:8081'
+    #     depends_on:
+    #         - redis
 
 networks:
     default:

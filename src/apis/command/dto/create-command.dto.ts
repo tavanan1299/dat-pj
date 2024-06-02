@@ -23,7 +23,7 @@ export class CreateCommandDto {
 	@IsNotEmpty()
 	expectPrice!: number;
 
-	@ApiProperty({ description: 'Type' })
+	@ApiProperty({ description: 'Type', example: `${CommandType.BUY}|${CommandType.SELL}` })
 	@IsEnum(CommandType)
 	@IsNotEmpty()
 	type!: CommandType;
