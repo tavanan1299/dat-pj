@@ -19,43 +19,41 @@ export class TransferPendingWalletHandler implements ICommandHandler<TransferPen
 
 	async execute(command: TransferPendingWalletCommand) {
 		this.logger.debug('execute');
-		return await this.entityManager.transaction(async (trx) => {
-			try {
-				const { data, user } = command;
+		try {
+			const { data, user } = command;
 
-				const currentUser = await UserEntity.findOne({
-					where: { id: user.id },
-					relations: ['verify']
-				});
-				if (!currentUser) {
-					throw new BadRequestException('User not found');
-				}
-
-				const wallet = await WalletEntity.findOne({
-					where: { userId: user.id, coinName: data.coinName }
-				});
-
-				if (data.type === WalletType.WITHDRAW) {
-					if (!wallet || wallet?.quantity < data.quantity) {
-						throw new BadRequestException('Your wallet is not enough');
-					}
-
-					if (!currentUser?.verify || currentUser?.verify?.isVerified == false) {
-						throw new BadRequestException('User has not been verified by admin yet');
-					}
-				}
-
-				const newPendingWallet = PendingWalletEntity.create({
-					userId: user.id,
-					...data
-				});
-
-				await PendingWalletEntity.save(newPendingWallet);
-
-				return 'Request transfer coin successfully!';
-			} catch (error: any) {
-				throw error;
+			const currentUser = await UserEntity.findOne({
+				where: { id: user.id },
+				relations: ['verify']
+			});
+			if (!currentUser) {
+				throw new BadRequestException('User not found');
 			}
-		});
+
+			const wallet = await WalletEntity.findOne({
+				where: { userId: user.id, coinName: data.coinName }
+			});
+
+			if (data.type === WalletType.WITHDRAW) {
+				if (!wallet || wallet?.quantity < data.quantity) {
+					throw new BadRequestException('Your wallet is not enough');
+				}
+
+				if (!currentUser?.verify || currentUser?.verify?.isVerified == false) {
+					throw new BadRequestException('User has not been verified by admin yet');
+				}
+			}
+
+			const newPendingWallet = PendingWalletEntity.create({
+				userId: user.id,
+				...data
+			});
+
+			await PendingWalletEntity.save(newPendingWallet);
+
+			return 'Request transfer coin successfully!';
+		} catch (error: any) {
+			throw error;
+		}
 	}
 }
