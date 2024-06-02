@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from '@common';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
+import { IsNumber, Min } from 'class-validator';
 
 export class VerifyDto {
 	@ApiProperty({ description: 'Email of the user' })
@@ -10,6 +10,7 @@ export class VerifyDto {
 
 	@ApiProperty({ description: 'OTP Code' })
 	@IsNumber()
+	@Min(100000)
 	@IsNotEmpty()
 	otp!: number;
 }

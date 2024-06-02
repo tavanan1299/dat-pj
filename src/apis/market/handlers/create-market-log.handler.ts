@@ -134,7 +134,6 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 		coinName: string,
 		quantity: number
 	) {
-		console.log(quantity);
 		await entityManager
 			.createQueryBuilder()
 			.update(WalletEntity)

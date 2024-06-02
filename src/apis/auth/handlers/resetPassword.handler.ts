@@ -44,7 +44,7 @@ export class ResetPasswordHandler implements ICommandHandler<ResetPasswordComman
 				return 'Reset password successfully!';
 			}
 
-			return 'OTP code is invalid or expired!';
+			throw new BadRequestException('OTP code is invalid or expired!');
 		} catch (error) {
 			throw new BadRequestException('An error occurred. Please try again!');
 		}
