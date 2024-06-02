@@ -61,7 +61,7 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 				return this.depositWallet(wallet, pendingWallet);
 			}
 		} catch (error) {
-			console.log(error);
+			throw error;
 		}
 	}
 

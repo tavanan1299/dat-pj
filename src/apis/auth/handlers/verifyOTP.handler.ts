@@ -50,7 +50,7 @@ export class VerifyUserHandler implements ICommandHandler<VerifyCommand> {
 				return 'Verify successfully!';
 			}
 
-			return 'OTP code is invalid or expired!';
+			throw new BadRequestException('OTP code is invalid or expired!');
 		} catch (error) {
 			throw new BadRequestException('An error occurred. Please try again!');
 		}
