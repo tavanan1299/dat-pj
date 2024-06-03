@@ -26,7 +26,7 @@ import { WalletService } from './wallet.service';
 	],
 	controllers: [WalletController],
 	providers: [
-		WalletService,
+		// WalletService,
 		{
 			provide: IWallet,
 			useClass: WalletService
@@ -38,6 +38,7 @@ import { WalletService } from './wallet.service';
 		ApprovePendingWalletHandler,
 		TransferPendingWalletHandler,
 		GetAllPendingWalletPaginatedHandler
-	]
+	],
+	exports: [IWallet]
 })
 export class WalletModule {}

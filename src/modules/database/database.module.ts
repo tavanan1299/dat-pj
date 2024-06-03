@@ -19,13 +19,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 				migrationsTableName: `migrations`,
 				migrations: [__dirname + '/migrations/*{.ts,.js}'],
 				migrationsRun: false,
-				synchronize: false,
-				ssl: true,
-				extra: {
-					ssl: {
-						rejectUnauthorized: false
-					}
-				}
+				synchronize: false
+				// ssl: true,
+				// extra: {
+				// 	ssl: {
+				// 		rejectUnauthorized: false
+				// 	}
+				// }
 			})
 		})
 	]

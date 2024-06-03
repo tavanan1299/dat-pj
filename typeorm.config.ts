@@ -17,11 +17,11 @@ export default new DataSource({
 	entities: ['**/*.entity.js'],
 	migrationsTableName: `migrations`,
 	migrations: [__dirname + '/src/modules/database/migrations/*{.ts,.js}'],
-	synchronize: false,
-	ssl: true,
-	extra: {
-		ssl: {
-			rejectUnauthorized: false
-		}
-	}
+	synchronize: false
+	// ssl: true,
+	// extra: {
+	// 	ssl: {
+	// 		rejectUnauthorized: false
+	// 	}
+	// }
 });
