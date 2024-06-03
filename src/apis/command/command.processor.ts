@@ -1,11 +1,11 @@
-import { CommandType, MarketLogStatus, MarketLogType } from '@app/common/enums/status.enum';
+import { CommandType, CommonStatus } from '@app/common/enums/status.enum';
 import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { CommandLogEntity } from '../log/command-log/entities/command-log.entity';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
-import { MarketLogEntity } from '../market/entities/market-log.entity';
 import { WalletEntity } from '../wallet/entities/wallet.entity';
 import { CommandEntity } from './entities/command.entity';
 
@@ -82,23 +82,6 @@ export class CommandProcessor extends WorkerHost {
 					});
 				}
 
-				if (wallet && wallet?.quantity < command.quantity) {
-					await trx.getRepository(CommandEntity).delete(command.id);
-
-					// add fail log
-					await trx.getRepository(MarketLogEntity).save({
-						coinName: command.coinName,
-						quantity: command.quantity,
-						currentPrice: isLostStop ? command.lossStopPrice : command.expectPrice,
-						totalPay: command.totalPay,
-						userId: command.userId,
-						type: MarketLogType.COMMAND_SELL,
-						status: MarketLogStatus.FAIL,
-						desc: 'Wallet balance is not enough'
-					});
-					return;
-				}
-
 				await trx.getRepository(WalletEntity).update(wallet.id, {
 					...wallet,
 					quantity: +wallet?.quantity - +command.quantity
@@ -106,25 +89,28 @@ export class CommandProcessor extends WorkerHost {
 
 				await trx.getRepository(CommandEntity).delete(command.id);
 
+				const { id, createdAt, updatedAt, deletedAt, ...rest } = command;
+
 				// add logs
-				await trx.getRepository(MarketLogEntity).save({
-					coinName: command.coinName,
-					quantity: command.quantity,
-					currentPrice: isLostStop ? command.lossStopPrice : command.expectPrice,
-					totalPay: command.totalPay,
-					userId: command.userId,
-					type: MarketLogType.COMMAND_SELL,
-					status: MarketLogStatus.SUCCESS
+				await trx.getRepository(CommandLogEntity).save({
+					...rest,
+					isLostStop,
+					type: CommandType.SELL,
+					status: CommonStatus.SUCCESS
 				});
 
-				await trx.getRepository(WalletLogEntity).save({
-					userId: wallet.userId,
-					walletId: wallet.id,
-					coinName: wallet.coinName,
-					quantity: command.quantity,
-					remainBalance: +wallet?.quantity - +command.quantity,
-					type: WalletLogType.COMMAND_SELL
-				});
+				await trx
+					.getRepository(WalletLogEntity)
+					.save({
+						userId: wallet.userId,
+						walletId: wallet.id,
+						coinName: wallet.coinName,
+						quantity: command.quantity,
+						remainBalance: +wallet?.quantity - +command.quantity,
+						type: WalletLogType.COMMAND_SELL
+					})
+					.then()
+					.catch((error) => console.log(error));
 
 				return;
 			});
@@ -158,15 +144,12 @@ export class CommandProcessor extends WorkerHost {
 
 				await trx.getRepository(CommandEntity).delete(command.id);
 
+				const { id, createdAt, updatedAt, deletedAt, ...rest } = command;
 				// add logs
-				await trx.getRepository(MarketLogEntity).save({
-					coinName: command.coinName,
-					quantity: command.quantity,
-					currentPrice: command.expectPrice,
-					totalPay: command.totalPay,
-					userId: command.userId,
-					type: MarketLogType.COMMAND_BUY,
-					status: MarketLogStatus.SUCCESS
+				await trx.getRepository(CommandLogEntity).save({
+					...rest,
+					type: CommandType.BUY,
+					status: CommonStatus.SUCCESS
 				});
 
 				await trx.getRepository(WalletLogEntity).save({

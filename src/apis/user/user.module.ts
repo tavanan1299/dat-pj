@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ICommand } from '../command/command.interface';
 import { CommandService } from '../command/command.service';
 import { CommandEntity } from '../command/entities/command.entity';
+import { CommandLogEntity } from '../log/command-log/entities/command-log.entity';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
 import { IWalletLog } from '../log/wallet-log/wallet-log.interface';
 import { WalletLogService } from '../log/wallet-log/wallet-log.service';
@@ -43,7 +44,8 @@ import { UserService } from './user.service';
 			PendingWalletEntity,
 			MarketLogEntity,
 			WalletLogEntity,
-			CommandEntity
+			CommandEntity,
+			CommandLogEntity
 		])
 	],
 	controllers: [UserController],
