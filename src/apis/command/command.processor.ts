@@ -159,6 +159,7 @@ export class CommandProcessor extends WorkerHost {
 				// });
 
 				await this.walletService.increase(
+					trx,
 					command.coinName,
 					command.quantity,
 					command.userId

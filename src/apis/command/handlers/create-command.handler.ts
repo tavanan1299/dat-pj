@@ -4,6 +4,7 @@ import { CommandType } from '@app/common/enums/status.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EntityManager } from 'typeorm';
 import { ICommand } from '../command.interface';
 import { CreateCommand } from '../commands/create-command.command';
 import { CreateCommandDto } from '../dto/create-command.dto';
@@ -15,7 +16,8 @@ export class CreateCommandHandler implements ICommandHandler<CreateCommand> {
 	constructor(
 		private readonly commandService: ICommand,
 		private eventEmitter: EventEmitter2,
-		private readonly walletService: IWallet
+		private readonly walletService: IWallet,
+		private readonly entityManager: EntityManager
 	) {}
 
 	async execute(command: CreateCommand) {
@@ -35,7 +37,12 @@ export class CreateCommandHandler implements ICommandHandler<CreateCommand> {
 			});
 		} else {
 			await this.commandService.create({ ...data, userId: user.id });
-			await this.walletService.decrease(data.coinName, data.quantity, user.id);
+			await this.walletService.decrease(
+				this.entityManager,
+				data.coinName,
+				data.quantity,
+				user.id
+			);
 		}
 
 		this.eventEmitter.emit('command.created', data.coinName);

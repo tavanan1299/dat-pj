@@ -1,7 +1,7 @@
 import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
 import { WalletEntity } from './entities/wallet.entity';
 import { IWallet } from './wallet.interface';
@@ -19,8 +19,8 @@ export class WalletService extends IWallet {
 		super(walletRepo);
 	}
 
-	async decrease(coinName: string, coinQuantity: number, userId: string) {
-		const currentWallet = await this.walletRepo.findOne({
+	async decrease(trx: EntityManager, coinName: string, coinQuantity: number, userId: string) {
+		const currentWallet = await trx.getRepository(WalletEntity).findOne({
 			where: {
 				coinName,
 				userId
@@ -31,12 +31,12 @@ export class WalletService extends IWallet {
 			throw new BadRequestException('Wallet not found!');
 		}
 
-		await this.walletRepo.update(currentWallet.id, {
+		await trx.getRepository(WalletEntity).update(currentWallet.id, {
 			...currentWallet,
 			quantity: +currentWallet.quantity - +coinQuantity
 		});
 
-		await this.walletLogRepo.save({
+		await trx.getRepository(WalletLogEntity).save({
 			userId: currentWallet.userId,
 			walletId: currentWallet.id,
 			coinName: currentWallet.coinName,
@@ -46,8 +46,8 @@ export class WalletService extends IWallet {
 		});
 	}
 
-	async increase(coinName: string, coinQuantity: number, userId: string) {
-		const currentWallet = await this.walletRepo.findOne({
+	async increase(trx: EntityManager, coinName: string, coinQuantity: number, userId: string) {
+		const currentWallet = await trx.getRepository(WalletEntity).findOne({
 			where: {
 				coinName,
 				userId
@@ -58,12 +58,12 @@ export class WalletService extends IWallet {
 			throw new BadRequestException('Wallet not found!');
 		}
 
-		await this.walletRepo.update(currentWallet.id, {
+		await trx.getRepository(WalletEntity).update(currentWallet.id, {
 			...currentWallet,
 			quantity: +currentWallet.quantity + +coinQuantity
 		});
 
-		await this.walletLogRepo.save({
+		await trx.getRepository(WalletLogEntity).save({
 			userId: currentWallet.userId,
 			walletId: currentWallet.id,
 			coinName: currentWallet.coinName,
