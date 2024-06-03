@@ -1,4 +1,5 @@
 import { RefreshTokenEntity } from '@app/apis/user/entities/refreshToken.entity';
+import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -17,7 +18,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 
 	async execute(command: LoginCommand) {
 		this.logger.debug('execute');
-		const { user } = command;
+		const { user, data: dataLogin } = command;
 		const payload: JwtPayload = {
 			id: user.id
 		};
@@ -30,6 +31,10 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 		});
 
 		await RefreshTokenEntity.save(newRT);
+
+		await UserEntity.update(user.id, {
+			fcmToken: dataLogin.fcmToken
+		});
 
 		const outdatedRF = await RefreshTokenEntity.find({
 			where: {

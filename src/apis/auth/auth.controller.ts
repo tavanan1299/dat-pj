@@ -47,7 +47,7 @@ export class AuthController {
 	@Post('user/login')
 	@HttpCode(200)
 	loginUser(@Body() _loginUserDto: LoginUserDto, @User() user: UserEntity) {
-		return this.commandBus.execute(new LoginCommand({ user }));
+		return this.commandBus.execute(new LoginCommand({ user, data: _loginUserDto }));
 	}
 
 	@SkipAuth()
