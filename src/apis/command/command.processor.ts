@@ -101,11 +101,6 @@ export class CommandProcessor extends WorkerHost {
 					return;
 				}
 
-				// await trx.getRepository(WalletEntity).update(wallet.id, {
-				// 	...wallet,
-				// 	quantity: +wallet?.quantity - +command.quantity
-				// });
-
 				await trx.getRepository(CommandEntity).delete(command.id);
 
 				// add logs
@@ -119,15 +114,6 @@ export class CommandProcessor extends WorkerHost {
 					status: MarketLogStatus.SUCCESS
 				});
 
-				// await trx.getRepository(WalletLogEntity).save({
-				// 	userId: wallet.userId,
-				// 	walletId: wallet.id,
-				// 	coinName: wallet.coinName,
-				// 	quantity: command.quantity,
-				// 	remainBalance: +wallet?.quantity - +command.quantity,
-				// 	type: WalletLogType.COMMAND_SELL
-				// });
-
 				return;
 			});
 		}
@@ -138,26 +124,6 @@ export class CommandProcessor extends WorkerHost {
 	async handleBuy(data: Record<string, any>[]) {
 		for (const command of data) {
 			await this.entityManager.transaction(async (trx) => {
-				let wallet = await trx.getRepository(WalletEntity).findOne({
-					where: {
-						userId: command.userId,
-						coinName: command.coinName
-					}
-				});
-
-				if (!wallet) {
-					wallet = await trx.getRepository(WalletEntity).save({
-						userId: command.userId,
-						coinName: command.coinName,
-						quantity: 0
-					});
-				}
-
-				// await trx.getRepository(WalletEntity).update(wallet.id, {
-				// 	...wallet,
-				// 	quantity: +wallet?.quantity + +command.quantity
-				// });
-
 				await this.walletService.increase(
 					trx,
 					command.coinName,
@@ -177,15 +143,6 @@ export class CommandProcessor extends WorkerHost {
 					type: MarketLogType.COMMAND_BUY,
 					status: MarketLogStatus.SUCCESS
 				});
-
-				// await trx.getRepository(WalletLogEntity).save({
-				// 	userId: wallet.userId,
-				// 	walletId: wallet.id,
-				// 	coinName: wallet.coinName,
-				// 	quantity: command.quantity,
-				// 	remainBalance: +wallet?.quantity + +command.quantity,
-				// 	type: WalletLogType.COMMAND_BUY
-				// });
 			});
 		}
 

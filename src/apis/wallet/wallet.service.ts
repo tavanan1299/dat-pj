@@ -1,5 +1,5 @@
 import { WalletLogType } from '@app/common/enums/walletLog.enum';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
@@ -20,7 +20,7 @@ export class WalletService extends IWallet {
 	}
 
 	async decrease(trx: EntityManager, coinName: string, coinQuantity: number, userId: string) {
-		const currentWallet = await trx.getRepository(WalletEntity).findOne({
+		let currentWallet = await trx.getRepository(WalletEntity).findOne({
 			where: {
 				coinName,
 				userId
@@ -28,7 +28,11 @@ export class WalletService extends IWallet {
 		});
 
 		if (!currentWallet) {
-			throw new BadRequestException('Wallet not found!');
+			currentWallet = await trx.getRepository(WalletEntity).save({
+				userId,
+				coinName,
+				quantity: 0
+			});
 		}
 
 		await trx.getRepository(WalletEntity).update(currentWallet.id, {
@@ -47,7 +51,7 @@ export class WalletService extends IWallet {
 	}
 
 	async increase(trx: EntityManager, coinName: string, coinQuantity: number, userId: string) {
-		const currentWallet = await trx.getRepository(WalletEntity).findOne({
+		let currentWallet = await trx.getRepository(WalletEntity).findOne({
 			where: {
 				coinName,
 				userId
@@ -55,7 +59,11 @@ export class WalletService extends IWallet {
 		});
 
 		if (!currentWallet) {
-			throw new BadRequestException('Wallet not found!');
+			currentWallet = await trx.getRepository(WalletEntity).save({
+				userId,
+				coinName,
+				quantity: 0
+			});
 		}
 
 		await trx.getRepository(WalletEntity).update(currentWallet.id, {
