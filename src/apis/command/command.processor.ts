@@ -99,18 +99,14 @@ export class CommandProcessor extends WorkerHost {
 					status: CommonStatus.SUCCESS
 				});
 
-				await trx
-					.getRepository(WalletLogEntity)
-					.save({
-						userId: wallet.userId,
-						walletId: wallet.id,
-						coinName: wallet.coinName,
-						quantity: command.quantity,
-						remainBalance: +wallet?.quantity - +command.quantity,
-						type: WalletLogType.COMMAND_SELL
-					})
-					.then()
-					.catch((error) => console.log(error));
+				await trx.getRepository(WalletLogEntity).save({
+					userId: wallet.userId,
+					walletId: wallet.id,
+					coinName: wallet.coinName,
+					quantity: command.quantity,
+					remainBalance: +wallet?.quantity - +command.quantity,
+					type: WalletLogType.COMMAND_SELL
+				});
 
 				return;
 			});
