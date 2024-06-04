@@ -12,6 +12,6 @@ export class GetAllUserPaginatedHandler implements ICommandHandler<GetAllUserPag
 	async execute(command: GetAllUserPaginatedCommand) {
 		this.logger.log(command);
 		const { query } = command;
-		return this.userService.getAllPaginated(query);
+		return this.userService.getAllPaginated({ ...query, relations: ['profile'] });
 	}
 }
