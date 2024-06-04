@@ -1,19 +1,20 @@
 import { CommandType, CommonStatus } from '@app/common/enums/status.enum';
-import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { CommandLogEntity } from '../log/command-log/entities/command-log.entity';
-import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
-import { WalletEntity } from '../wallet/entities/wallet.entity';
+import { IWallet } from '../wallet/wallet.interface';
 import { CommandEntity } from './entities/command.entity';
 
 @Processor('binance:coin', { concurrency: 2 })
 export class CommandProcessor extends WorkerHost {
 	private logger = new Logger();
 
-	constructor(private readonly entityManager: EntityManager) {
+	constructor(
+		private readonly entityManager: EntityManager,
+		private readonly walletService: IWallet
+	) {
 		super();
 	}
 
@@ -67,26 +68,6 @@ export class CommandProcessor extends WorkerHost {
 	async handleSell(data: Record<string, any>[], isLostStop = false) {
 		for (const command of data) {
 			await this.entityManager.transaction(async (trx) => {
-				let wallet = await trx.getRepository(WalletEntity).findOne({
-					where: {
-						userId: command.userId,
-						coinName: command.coinName
-					}
-				});
-
-				if (!wallet) {
-					wallet = await trx.getRepository(WalletEntity).save({
-						userId: command.userId,
-						coinName: command.coinName,
-						quantity: 0
-					});
-				}
-
-				await trx.getRepository(WalletEntity).update(wallet.id, {
-					...wallet,
-					quantity: +wallet?.quantity - +command.quantity
-				});
-
 				await trx.getRepository(CommandEntity).delete(command.id);
 
 				const { id, createdAt, updatedAt, deletedAt, ...rest } = command;
@@ -99,15 +80,6 @@ export class CommandProcessor extends WorkerHost {
 					status: CommonStatus.SUCCESS
 				});
 
-				await trx.getRepository(WalletLogEntity).save({
-					userId: wallet.userId,
-					walletId: wallet.id,
-					coinName: wallet.coinName,
-					quantity: command.quantity,
-					remainBalance: +wallet?.quantity - +command.quantity,
-					type: WalletLogType.COMMAND_SELL
-				});
-
 				return;
 			});
 		}
@@ -118,25 +90,12 @@ export class CommandProcessor extends WorkerHost {
 	async handleBuy(data: Record<string, any>[]) {
 		for (const command of data) {
 			await this.entityManager.transaction(async (trx) => {
-				let wallet = await trx.getRepository(WalletEntity).findOne({
-					where: {
-						userId: command.userId,
-						coinName: command.coinName
-					}
-				});
-
-				if (!wallet) {
-					wallet = await trx.getRepository(WalletEntity).save({
-						userId: command.userId,
-						coinName: command.coinName,
-						quantity: 0
-					});
-				}
-
-				await trx.getRepository(WalletEntity).update(wallet.id, {
-					...wallet,
-					quantity: +wallet?.quantity + +command.quantity
-				});
+				await this.walletService.increase(
+					trx,
+					command.coinName,
+					command.quantity,
+					command.userId
+				);
 
 				await trx.getRepository(CommandEntity).delete(command.id);
 
@@ -146,15 +105,6 @@ export class CommandProcessor extends WorkerHost {
 					...rest,
 					type: CommandType.BUY,
 					status: CommonStatus.SUCCESS
-				});
-
-				await trx.getRepository(WalletLogEntity).save({
-					userId: wallet.userId,
-					walletId: wallet.id,
-					coinName: wallet.coinName,
-					quantity: command.quantity,
-					remainBalance: +wallet?.quantity + +command.quantity,
-					type: WalletLogType.COMMAND_BUY
 				});
 			});
 		}
