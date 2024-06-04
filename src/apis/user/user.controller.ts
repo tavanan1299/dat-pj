@@ -44,7 +44,6 @@ export class UserController {
 		return this.commandBus.execute(new GetMyTransHistoriesCommand({ query, user }));
 	}
 
-
 	@ApiOperation({ description: 'Get my stacking' })
 	@ApiOkResponse({ description: 'Get my stacking successfully' })
 	@Get('stacking/me')
