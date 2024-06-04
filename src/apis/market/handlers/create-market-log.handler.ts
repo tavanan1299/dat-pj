@@ -1,7 +1,7 @@
 import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.entity';
 import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
-import { MarketLogStatus, MarketLogType } from '@app/common/enums/status.enum';
+import { CommandType, CommonStatus, MarketLogType } from '@app/common/enums/status.enum';
 import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -47,7 +47,7 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 			}
 
 			switch (data.type) {
-				case MarketLogType.MARKET_BUY:
+				case CommandType.BUY:
 					await this.entityManager.transaction(async (trx) => {
 						await this.updateWallet(
 							trx,
@@ -64,7 +64,7 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 								totalPay: data.totalPay,
 								userId: currentUser.id,
 								type: MarketLogType.MARKET_BUY,
-								status: MarketLogStatus.SUCCESS
+								status: CommonStatus.SUCCESS
 							})
 						);
 
@@ -82,7 +82,7 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 
 					return 'Create successfully';
 
-				case MarketLogType.MARKET_SELL:
+				case CommandType.SELL:
 					if (currentWallet && currentWallet?.quantity < data.quantity) {
 						throw new BadRequestException('Your wallet is not enough');
 					}
@@ -102,7 +102,7 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 								totalPay: data.totalPay,
 								userId: currentUser.id,
 								type: MarketLogType.MARKET_SELL,
-								status: MarketLogStatus.SUCCESS
+								status: CommonStatus.SUCCESS
 							})
 						);
 
