@@ -74,6 +74,13 @@ export class UserController {
 		return this.commandBus.execute(new GetMyCommandCommand({ query, user }));
 	}
 
+	@ApiOperation({ description: 'Get my profile' })
+	@ApiOkResponse({ description: 'Get my profile successfully' })
+	@Get('me')
+	getMe(@User() user: UserEntity) {
+		return this.commandBus.execute(new GetOneUserByIdCommand({ id: user.id }));
+	}
+
 	@ApiOperation({ description: 'Get one user' })
 	@ApiOkResponse({ description: 'Get one user successfully' })
 	@Get(':id')
