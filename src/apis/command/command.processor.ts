@@ -1,10 +1,9 @@
-import { CommandType, MarketLogStatus, MarketLogType } from '@app/common/enums/status.enum';
+import { CommandType, CommonStatus } from '@app/common/enums/status.enum';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
-import { MarketLogEntity } from '../market/entities/market-log.entity';
-import { WalletEntity } from '../wallet/entities/wallet.entity';
+import { CommandLogEntity } from '../log/command-log/entities/command-log.entity';
 import { IWallet } from '../wallet/wallet.interface';
 import { CommandEntity } from './entities/command.entity';
 
@@ -69,49 +68,16 @@ export class CommandProcessor extends WorkerHost {
 	async handleSell(data: Record<string, any>[], isLostStop = false) {
 		for (const command of data) {
 			await this.entityManager.transaction(async (trx) => {
-				let wallet = await trx.getRepository(WalletEntity).findOne({
-					where: {
-						userId: command.userId,
-						coinName: command.coinName
-					}
-				});
-
-				if (!wallet) {
-					wallet = await trx.getRepository(WalletEntity).save({
-						userId: command.userId,
-						coinName: command.coinName,
-						quantity: 0
-					});
-				}
-
-				if (wallet && wallet?.quantity < command.quantity) {
-					await trx.getRepository(CommandEntity).delete(command.id);
-
-					// add fail log
-					await trx.getRepository(MarketLogEntity).save({
-						coinName: command.coinName,
-						quantity: command.quantity,
-						currentPrice: isLostStop ? command.lossStopPrice : command.expectPrice,
-						totalPay: command.totalPay,
-						userId: command.userId,
-						type: MarketLogType.COMMAND_SELL,
-						status: MarketLogStatus.FAIL,
-						desc: 'Wallet balance is not enough'
-					});
-					return;
-				}
-
 				await trx.getRepository(CommandEntity).delete(command.id);
 
+				const { id, createdAt, updatedAt, deletedAt, ...rest } = command;
+
 				// add logs
-				await trx.getRepository(MarketLogEntity).save({
-					coinName: command.coinName,
-					quantity: command.quantity,
-					currentPrice: isLostStop ? command.lossStopPrice : command.expectPrice,
-					totalPay: command.totalPay,
-					userId: command.userId,
-					type: MarketLogType.COMMAND_SELL,
-					status: MarketLogStatus.SUCCESS
+				await trx.getRepository(CommandLogEntity).save({
+					...rest,
+					isLostStop,
+					type: CommandType.SELL,
+					status: CommonStatus.SUCCESS
 				});
 
 				return;
@@ -133,15 +99,12 @@ export class CommandProcessor extends WorkerHost {
 
 				await trx.getRepository(CommandEntity).delete(command.id);
 
+				const { id, createdAt, updatedAt, deletedAt, ...rest } = command;
 				// add logs
-				await trx.getRepository(MarketLogEntity).save({
-					coinName: command.coinName,
-					quantity: command.quantity,
-					currentPrice: command.expectPrice,
-					totalPay: command.totalPay,
-					userId: command.userId,
-					type: MarketLogType.COMMAND_BUY,
-					status: MarketLogStatus.SUCCESS
+				await trx.getRepository(CommandLogEntity).save({
+					...rest,
+					type: CommandType.BUY,
+					status: CommonStatus.SUCCESS
 				});
 			});
 		}

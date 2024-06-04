@@ -3,10 +3,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ICommand } from '../command/command.interface';
 import { CommandService } from '../command/command.service';
 import { CommandEntity } from '../command/entities/command.entity';
+import { ICommandLog } from '../log/command-log/command-log.interface';
+import { CommandLogService } from '../log/command-log/command-log.service';
+import { CommandLogEntity } from '../log/command-log/entities/command-log.entity';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
 import { IWalletLog } from '../log/wallet-log/wallet-log.interface';
 import { WalletLogService } from '../log/wallet-log/wallet-log.service';
 import { MarketLogEntity } from '../market/entities/market-log.entity';
+import { IMarket } from '../market/market.interface';
+import { MarketService } from '../market/market.service';
 import { StackingEntity } from '../stacking/entities/stacking.entity';
 import { IStacking } from '../stacking/stacking.interface';
 import { StackingService } from '../stacking/stacking.service';
@@ -20,6 +25,8 @@ import { UserEntity } from './entities/user.entity';
 import { CreateUserHandler } from './handlers/create-user.handler';
 import { GetAllUserPaginatedHandler } from './handlers/get-all-user-paginated.handler';
 import { GetMyCommandHandler } from './handlers/get-my-command.handler';
+import { GetMyMarketHistoriesHandler } from './handlers/get-my-market-histories.handler';
+import { GetMySpotHistoriesHandler } from './handlers/get-my-spot-histories.handler';
 import { GetMyStacksHandler } from './handlers/get-my-stacks.handler';
 import { GetMyTransHistoriesHandler } from './handlers/get-my-trans-histories.handler';
 import { GetOneUserByIdHandler } from './handlers/get-one-user-by-id.handler';
@@ -43,7 +50,8 @@ import { UserService } from './user.service';
 			PendingWalletEntity,
 			MarketLogEntity,
 			WalletLogEntity,
-			CommandEntity
+			CommandEntity,
+			CommandLogEntity
 		])
 	],
 	controllers: [UserController],
@@ -64,6 +72,14 @@ import { UserService } from './user.service';
 			provide: ICommand,
 			useClass: CommandService
 		},
+		{
+			provide: IMarket,
+			useClass: MarketService
+		},
+		{
+			provide: ICommandLog,
+			useClass: CommandLogService
+		},
 		CreateUserHandler,
 		GetAllUserPaginatedHandler,
 		GetOneUserByIdHandler,
@@ -72,7 +88,9 @@ import { UserService } from './user.service';
 		UpsertHandler,
 		GetMyTransHistoriesHandler,
 		GetMyStacksHandler,
-		GetMyCommandHandler
+		GetMyCommandHandler,
+		GetMyMarketHistoriesHandler,
+		GetMySpotHistoriesHandler
 	],
 	exports: [IUserService]
 })

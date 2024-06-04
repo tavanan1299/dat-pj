@@ -4,6 +4,8 @@ import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { GetAllUserPaginatedCommand } from './commands/get-all-user-paginated.command';
 import { GetMyCommandCommand } from './commands/get-my-command.command';
+import { GetMyMarketHistoriesCommand } from './commands/get-my-market-histories.command';
+import { GetMySpotHistoriesCommand } from './commands/get-my-spot-histories.command';
 import { GetMyStacksCommand } from './commands/get-my-stacks.command';
 import { GetMyTransHistoriesCommand } from './commands/get-my-trans-histories.command';
 import { GetOneUserByIdCommand } from './commands/get-one-user-by-id.command';
@@ -44,6 +46,20 @@ export class UserController {
 		return this.commandBus.execute(new GetMyTransHistoriesCommand({ query, user }));
 	}
 
+	@ApiOperation({ description: 'Get my transaction history' })
+	@ApiOkResponse({ description: 'Get my transaction history successfully' })
+	@Get('market-history/me')
+	getMyMarketHistories(@Query() query: PaginationDto, @User() user: UserEntity) {
+		return this.commandBus.execute(new GetMyMarketHistoriesCommand({ query, user }));
+	}
+
+	@ApiOperation({ description: 'Get my transaction history' })
+	@ApiOkResponse({ description: 'Get my transaction history successfully' })
+	@Get('spot-history/me')
+	getMySpotHistories(@Query() query: PaginationDto, @User() user: UserEntity) {
+		return this.commandBus.execute(new GetMySpotHistoriesCommand({ query, user }));
+	}
+
 	@ApiOperation({ description: 'Get my stacking' })
 	@ApiOkResponse({ description: 'Get my stacking successfully' })
 	@Get('stacking/me')
@@ -56,6 +72,13 @@ export class UserController {
 	@Get('command/me')
 	getMyCommands(@Query() query: PaginationDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new GetMyCommandCommand({ query, user }));
+	}
+
+	@ApiOperation({ description: 'Get my profile' })
+	@ApiOkResponse({ description: 'Get my profile successfully' })
+	@Get('me')
+	getMe(@User() user: UserEntity) {
+		return this.commandBus.execute(new GetOneUserByIdCommand({ id: user.id }));
 	}
 
 	@ApiOperation({ description: 'Get one user' })
