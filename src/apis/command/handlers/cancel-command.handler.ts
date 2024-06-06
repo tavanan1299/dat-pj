@@ -1,5 +1,6 @@
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
 import { ROLES } from '@app/common/constants/role.constant';
+import { CommandType } from '@app/common/enums/status.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { EntityManager } from 'typeorm';
@@ -42,9 +43,11 @@ export class CancelCommandHandler implements ICommandHandler<CancelCommand> {
 					(currentCommand.userId === user.id || user.role.name === ROLES.ADMIN) &&
 					wallet
 				) {
-					await trx.getRepository(WalletEntity).update(wallet.id, {
-						quantity: currentCommand.quantity
-					});
+					if (currentCommand.type === CommandType.SELL) {
+						await trx.getRepository(WalletEntity).update(wallet.id, {
+							quantity: currentCommand.quantity
+						});
+					}
 
 					await trx.getRepository(CommandEntity).remove(currentCommand);
 
