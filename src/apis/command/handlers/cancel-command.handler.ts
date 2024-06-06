@@ -45,7 +45,7 @@ export class CancelCommandHandler implements ICommandHandler<CancelCommand> {
 				) {
 					if (currentCommand.type === CommandType.SELL) {
 						await trx.getRepository(WalletEntity).update(wallet.id, {
-							quantity: currentCommand.quantity
+							quantity: +wallet.quantity + +currentCommand.quantity
 						});
 					}
 

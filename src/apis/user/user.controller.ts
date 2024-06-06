@@ -1,7 +1,8 @@
 import { ApiController, PaginationDto, UseUserGuard, User } from '@common';
-import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { CancelMyCommands } from './commands/cancel-my-commands.command';
 import { GetAllUserPaginatedCommand } from './commands/get-all-user-paginated.command';
 import { GetMyCommandCommand } from './commands/get-my-command.command';
 import { GetMyMarketHistoriesCommand } from './commands/get-my-market-histories.command';
@@ -86,6 +87,13 @@ export class UserController {
 	@Get(':id')
 	getOne(@Param('id') id: string) {
 		return this.commandBus.execute(new GetOneUserByIdCommand({ id }));
+	}
+
+	@ApiOperation({ description: 'Cancel my Commands' })
+	@ApiOkResponse({ description: 'Cancel my Commands successfully' })
+	@Delete('command/me')
+	deleteMyCommands(@User() user: UserEntity) {
+		return this.commandBus.execute(new CancelMyCommands({ userId: user.id }));
 	}
 
 	// @Patch(':id')
