@@ -22,6 +22,7 @@ import { OTPEntity } from './entities/otp.entity';
 import { ProfileEntity } from './entities/profile.entity';
 import { RefreshTokenEntity } from './entities/refreshToken.entity';
 import { UserEntity } from './entities/user.entity';
+import { CancelMyCommandsHandler } from './handlers/cancel-my-commands.handler';
 import { CreateUserHandler } from './handlers/create-user.handler';
 import { GetAllUserPaginatedHandler } from './handlers/get-all-user-paginated.handler';
 import { GetMyCommandHandler } from './handlers/get-my-command.handler';
@@ -90,7 +91,8 @@ import { UserService } from './user.service';
 		GetMyStacksHandler,
 		GetMyCommandHandler,
 		GetMyMarketHistoriesHandler,
-		GetMySpotHistoriesHandler
+		GetMySpotHistoriesHandler,
+		CancelMyCommandsHandler
 	],
 	exports: [IUserService]
 })
