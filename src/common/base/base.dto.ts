@@ -2,6 +2,7 @@ import { BaseEntity } from '@common';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsOptional } from 'class-validator';
+import { FindOptionsOrder } from 'typeorm';
 import { IsNumber } from '../decorators/validation.decorator';
 
 export class PaginationDto<T = BaseEntity> {
@@ -17,14 +18,14 @@ export class PaginationDto<T = BaseEntity> {
 	@ApiProperty({ description: 'Current page', example: '1', type: 'string' })
 	page?: number;
 
-	// @IsOptional()
-	// @Transform(({ value }) => JSON.parse(value || '{}'))
-	// @ApiProperty({
-	// 	description: 'Sort by field',
-	// 	example: '{ "createdAt": "ASC" }',
-	// 	type: 'string'
-	// })
-	// order?: FindOptionsOrder<T>;
+	@IsOptional()
+	@Transform(({ value }) => JSON.parse(value || '{}'))
+	@ApiProperty({
+		description: 'Sort by field',
+		example: '{ "createdAt": "ASC" }',
+		type: 'string'
+	})
+	order?: FindOptionsOrder<T>;
 
 	// @IsOptional()
 	// @Transform(({ value }) => JSON.parse(value || '{}'))

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { google } from 'googleapis';
 import * as key from './firebase-sdk.json';
 
-type Notification = {
+export type Notification = {
 	title: string;
 	body: string;
 };
@@ -59,10 +59,10 @@ export class FirebaseService {
 		const access_token = (await this.getAccessToken()) as string;
 		const notification = JSON.stringify({
 			message: {
-				token: fcmToken, //'ca_JLj68wt6hvvaS5xjJaz:APA91bGlsIgTLpF8dggRgfb06tetU3yLwbP_Bu82_qcLiCvwdHsQles3a9noyUXuKNMHoaIzq-cWxBTPWIDl9dxGLQJ_1O71cMzdC4jTFXUpfrUyNDHk8gm_4fuSCAR4tDiu6LWayk5i',
-				notification: {
-					...dataNoti
-				},
+				token: fcmToken,
+				// notification: {
+				// 	...dataNoti
+				// },
 				apns: {
 					headers: {
 						'apns-priority': '10'
@@ -74,7 +74,8 @@ export class FirebaseService {
 					}
 				},
 				data: {
-					productId: this.configService.get('PRODUCT_ID')
+					productId: this.configService.get('PRODUCT_ID'),
+					...dataNoti
 				}
 			}
 		});

@@ -1,5 +1,3 @@
-import { UserEntity } from '@app/apis/user/entities/user.entity';
-import { Exists } from '@app/validators/exists.validator';
 import { IsEmail, IsNotEmpty, IsString } from '@common';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -17,6 +15,6 @@ export class LoginUserDto {
 	@ApiProperty({ description: 'FCM token of device' })
 	@IsString()
 	@IsNotEmpty()
-	@Exists([UserEntity, (validationArguments) => ({ fcmToken: validationArguments.value })])
+	// @Exists([UserEntity, (validationArguments) => ({ fcmToken: validationArguments.value })])
 	fcmToken!: string;
 }

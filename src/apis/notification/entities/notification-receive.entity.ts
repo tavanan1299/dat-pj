@@ -12,7 +12,7 @@ export class NotificationReceives extends BaseEntity {
 	isRead!: boolean;
 
 	@Column({ nullable: true })
-	read_date!: Date;
+	readDate!: Date;
 
 	@Column({ nullable: true })
 	userId!: string;
