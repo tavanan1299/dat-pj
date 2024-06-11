@@ -1,13 +1,18 @@
-import { PaginationDto, User } from '@app/common';
+import { ApiController, PaginationDto, UseUserGuard, User } from '@app/common';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { UserEntity } from '../user/entities/user.entity';
 import { GetAllNotificationPaginatedCommand } from './command/get-all-notification.command';
 import { GetOneNotificationByIdCommand } from './command/get-onenotification.command';
+import { PushAllNotificationCommand } from './command/push-all-notification.command';
+import { PushOneNotificationByIdCommand } from './command/push-one-notification.command';
+import { PushNotificationDto } from './dto/push-notification.dto';
 import { INotification } from './notification.interface';
 
+@ApiController('Notification')
 @Controller('notification')
+@UseUserGuard()
 export class NotificationController {
 	constructor(
 		private readonly notificationService: INotification,
@@ -18,7 +23,7 @@ export class NotificationController {
 	async create(@Body() data: any) {
 		await this.notificationService.sendNotification(
 			data,
-			'de74f38b-aa8b-4506-9fd0-cd0e41e5b747',
+			'cfb725f6-d0bf-482b-8c2f-c2390e844a62',
 			{
 				body: 'You have had an amount deducted from your wallet',
 				coinName: 'Bit Coin',
@@ -28,6 +33,15 @@ export class NotificationController {
 		);
 
 		return 'success';
+	}
+
+	@ApiOperation({ description: 'Push all notification' })
+	@ApiOkResponse({ description: 'Push all notification successfully' })
+	@Post('sendAllNotification')
+	pushAll(@Body() pushNotification: PushNotificationDto, @User() user: UserEntity) {
+		return this.commandBus.execute(
+			new PushAllNotificationCommand({ data: pushNotification, user })
+		);
 	}
 
 	@ApiOperation({ description: 'Get all notification' })
@@ -42,5 +56,18 @@ export class NotificationController {
 	@Get(':id')
 	getOne(@Param('id') id: string, @User() user: UserEntity) {
 		return this.commandBus.execute(new GetOneNotificationByIdCommand({ id, user }));
+	}
+
+	@ApiOperation({ description: 'Push one notification' })
+	@ApiOkResponse({ description: 'Push one notification successfully' })
+	@Post(':id')
+	pushOne(
+		@Body() pushNotification: PushNotificationDto,
+		@Param('id') id: string,
+		@User() user: UserEntity
+	) {
+		return this.commandBus.execute(
+			new PushOneNotificationByIdCommand({ id, data: pushNotification, user })
+		);
 	}
 }

@@ -11,10 +11,4 @@ export class LoginUserDto {
 	@IsString()
 	@IsNotEmpty()
 	password!: string;
-
-	@ApiProperty({ description: 'FCM token of device' })
-	@IsString()
-	@IsNotEmpty()
-	// @Exists([UserEntity, (validationArguments) => ({ fcmToken: validationArguments.value })])
-	fcmToken!: string;
 }

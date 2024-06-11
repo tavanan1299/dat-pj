@@ -18,7 +18,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 
 	async execute(command: LoginCommand) {
 		this.logger.debug('execute');
-		const { user, data: dataLogin } = command;
+		const { user, data: dataLogin, fcmToken } = command;
 		const payload: JwtPayload = {
 			id: user.id
 		};
@@ -31,9 +31,8 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 		});
 
 		await RefreshTokenEntity.save(newRT);
-
 		await UserEntity.update(user.id, {
-			fcmToken: dataLogin.fcmToken
+			fcmToken: fcmToken
 		});
 
 		const outdatedRF = await RefreshTokenEntity.find({
@@ -51,6 +50,6 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 		await RefreshTokenEntity.delete({ id: In(outdatedRF.map((rf) => rf.id)) });
 
 		const { password, ...rest } = user;
-		return { ...rest, ...data };
+		return { ...rest, ...data, fcmToken };
 	}
 }
