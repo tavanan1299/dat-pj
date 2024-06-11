@@ -31,7 +31,6 @@ export class NotificationProcessor extends WorkerHost {
 		};
 		const users = await this.userService.getAllUsers();
 		for (const user of users) {
-			console.log(data.content);
 			await this.notificationService.sendNotification(DATA_NOTI, user.id, {
 				body: data.content
 			});
