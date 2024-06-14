@@ -9,3 +9,5 @@ export const INTEREST_RATE = {
 	5: 20,
 	6: 25
 }; // lợi nhuận 1 tháng 5%, tương ứng cho 2, 3, 4, ...
+
+export const DEFAULT_CURRENCY = 'USDT';

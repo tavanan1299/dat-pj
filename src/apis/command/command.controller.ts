@@ -5,7 +5,9 @@ import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { UserEntity } from '../user/entities/user.entity';
 import { CancelCommand } from './commands/cancel-command.command';
 import { CreateCommand } from './commands/create-command.command';
+import { CreateFutureCommand } from './commands/create-future-command.command';
 import { CreateCommandDto } from './dto/create-command.dto';
+import { CreateFutureCommandDto } from './dto/create-future-command.dto';
 
 @ApiController('Command')
 @Controller('command')
@@ -13,17 +15,24 @@ import { CreateCommandDto } from './dto/create-command.dto';
 export class CommandController {
 	constructor(private readonly commandBus: CommandBus) {}
 
-	@ApiOperation({ description: 'Create Command' })
-	@ApiOkResponse({ description: 'Create Command successfully' })
-	@Post()
-	create(@Body() createCommand: CreateCommandDto, @User() user: UserEntity) {
+	@ApiOperation({ description: 'Create limit command' })
+	@ApiOkResponse({ description: 'Create limit command successfully' })
+	@Post('limit')
+	createLimitCommand(@Body() createCommand: CreateCommandDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new CreateCommand({ user, data: createCommand }));
 	}
 
-	@ApiOperation({ description: 'Cancel Command' })
-	@ApiOkResponse({ description: 'Cancel Command successfully' })
-	@Delete()
-	delete(@Param('commandId') commandId: string, @User() user: UserEntity) {
+	@ApiOperation({ description: 'Cancel limit command' })
+	@ApiOkResponse({ description: 'Cancel limit command successfully' })
+	@Delete('limit')
+	deleteLimitCommand(@Param('commandId') commandId: string, @User() user: UserEntity) {
 		return this.commandBus.execute(new CancelCommand({ commandId, user }));
+	}
+
+	@ApiOperation({ description: 'Create future command' })
+	@ApiOkResponse({ description: 'Create future command successfully' })
+	@Post('future')
+	createFutureCommand(@Body() data: CreateFutureCommandDto, @User() user: UserEntity) {
+		return this.commandBus.execute(new CreateFutureCommand({ user, data }));
 	}
 }
