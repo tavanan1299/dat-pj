@@ -9,6 +9,7 @@ import { PushAllNotificationCommand } from './command/push-all-notification.comm
 import { PushOneNotificationByIdCommand } from './command/push-one-notification.command';
 import { PushNotificationDto } from './dto/push-notification.dto';
 import { INotification } from './notification.interface';
+import { NotificationProcessor } from './notification.processor';
 
 @ApiController('Notification')
 @Controller('notification')
@@ -16,7 +17,8 @@ import { INotification } from './notification.interface';
 export class NotificationController {
 	constructor(
 		private readonly notificationService: INotification,
-		private readonly commandBus: CommandBus
+		private readonly commandBus: CommandBus,
+		private readonly notificationProcessor: NotificationProcessor
 	) {}
 
 	@Post()

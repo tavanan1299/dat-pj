@@ -1,7 +1,9 @@
+import { ROLES } from '@app/common/constants/role.constant';
+import { InjectQueue } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { Queue } from 'bullmq';
 import { PushAllNotificationCommand } from '../command/push-all-notification.command';
-import { INotification } from '../notification.interface';
 
 @CommandHandler(PushAllNotificationCommand)
 export class PushNotificationToAllUsersHandler
@@ -9,13 +11,20 @@ export class PushNotificationToAllUsersHandler
 {
 	private logger = new Logger(PushNotificationToAllUsersHandler.name);
 
-	constructor(private readonly NotificationService: INotification) {}
+	constructor(
+		@InjectQueue('notification')
+		private readonly sendNotificationAllUser: Queue
+	) {}
 
 	async execute(command: PushAllNotificationCommand) {
 		this.logger.log(command);
-		const { data } = command;
+		const { data, user } = command;
 
-		await this.NotificationService.sendNotificationToAllUsers(data);
+		if (!user) return 'User not found';
+
+		if (user.role.name !== ROLES.ADMIN) return 'User not permission';
+
+		await this.sendNotificationAllUser.add('sendNotification', data);
 		return 'success';
 	}
 }

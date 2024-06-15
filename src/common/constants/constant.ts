@@ -11,7 +11,8 @@ export const INTEREST_RATE = {
 }; // lợi nhuận 1 tháng 5%, tương ứng cho 2, 3, 4, ...
 
 export const NotificationEntity = {
-	TRANSACTION: 'transaction'
+	TRANSACTION: 'transaction',
+	NOTIFICATION: 'notification'
 } as const;
 
 export const NotificationEntityKind = {

@@ -2,6 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { UserService } from '../user/user.service';
+import { PushNotificationDto } from './dto/push-notification.dto';
 import { INotification } from './notification.interface';
 import { Notification_Type } from './types';
 
@@ -21,11 +22,11 @@ export class NotificationProcessor extends WorkerHost {
 		return data;
 	}
 
-	async sendNotification(data: any) {
+	async sendNotification(data: PushNotificationDto) {
 		this.logger.log('Processing send notification....');
 		const DATA_NOTI: Notification_Type = {
 			message: 'Message from admin',
-			entity: 'transaction',
+			entity: 'notification',
 			entityKind: 'create',
 			notiType: 'announcement'
 		};

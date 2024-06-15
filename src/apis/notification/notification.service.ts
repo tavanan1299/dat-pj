@@ -1,11 +1,8 @@
 import { FirebaseService } from '@app/modules/firebase/firebase.service';
-import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Queue } from 'bullmq';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../user/entities/user.entity';
-import { PushNotificationDto } from './dto/push-notification.dto';
 import { NotificationReceives } from './entities/notification-receive.entity';
 import { Notification } from './entities/notification.entity';
 import { INotification } from './notification.interface';
@@ -20,15 +17,9 @@ export class NotificationService extends INotification {
 		private readonly notificationRepo: Repository<Notification>,
 		@InjectRepository(NotificationReceives)
 		private readonly notificationReceiveRepo: Repository<NotificationReceives>,
-		private readonly firebaseService: FirebaseService,
-		@InjectQueue('notification')
-		private readonly sendNotificationAllUser: Queue
+		private readonly firebaseService: FirebaseService
 	) {
 		super(notificationRepo);
-	}
-
-	async sendNotificationToAllUsers(data: PushNotificationDto) {
-		await this.sendNotificationAllUser.add('sendNotification', data);
 	}
 
 	async sendNotification(
