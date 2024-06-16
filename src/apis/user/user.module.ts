@@ -3,6 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ICommand } from '../command/command.interface';
 import { CommandService } from '../command/command.service';
 import { CommandEntity } from '../command/entities/command.entity';
+import { FutureCommandEntity } from '../command/entities/future-command.entity';
+import { IFutureCommand } from '../command/future-command.interface';
+import { FutureCommandService } from '../command/future-command.service';
 import { ICommandLog } from '../log/command-log/command-log.interface';
 import { CommandLogService } from '../log/command-log/command-log.service';
 import { CommandLogEntity } from '../log/command-log/entities/command-log.entity';
@@ -18,14 +21,18 @@ import { StackingService } from '../stacking/stacking.service';
 import { VerifyUserEntity } from '../verify-user/entities/verify-user.entity';
 import { PendingWalletEntity } from '../wallet/entities/pending-wallet.entity';
 import { WalletEntity } from '../wallet/entities/wallet.entity';
+import { IWallet } from '../wallet/wallet.interface';
+import { WalletService } from '../wallet/wallet.service';
 import { OTPEntity } from './entities/otp.entity';
 import { ProfileEntity } from './entities/profile.entity';
 import { RefreshTokenEntity } from './entities/refreshToken.entity';
 import { UserEntity } from './entities/user.entity';
 import { CancelMyCommandsHandler } from './handlers/cancel-my-commands.handler';
+import { CancelMyFutureCommandsHandler } from './handlers/cancel-my-future-commands.handler';
 import { CreateUserHandler } from './handlers/create-user.handler';
 import { GetAllUserPaginatedHandler } from './handlers/get-all-user-paginated.handler';
 import { GetMyCommandHandler } from './handlers/get-my-command.handler';
+import { GetMyFutureCommandHandler } from './handlers/get-my-future-command.handler';
 import { GetMyMarketHistoriesHandler } from './handlers/get-my-market-histories.handler';
 import { GetMySpotHistoriesHandler } from './handlers/get-my-spot-histories.handler';
 import { GetMyStacksHandler } from './handlers/get-my-stacks.handler';
@@ -52,7 +59,8 @@ import { UserService } from './user.service';
 			MarketLogEntity,
 			WalletLogEntity,
 			CommandEntity,
-			CommandLogEntity
+			CommandLogEntity,
+			FutureCommandEntity
 		])
 	],
 	controllers: [UserController],
@@ -81,6 +89,14 @@ import { UserService } from './user.service';
 			provide: ICommandLog,
 			useClass: CommandLogService
 		},
+		{
+			provide: IFutureCommand,
+			useClass: FutureCommandService
+		},
+		{
+			provide: IWallet,
+			useClass: WalletService
+		},
 		CreateUserHandler,
 		GetAllUserPaginatedHandler,
 		GetOneUserByIdHandler,
@@ -92,7 +108,9 @@ import { UserService } from './user.service';
 		GetMyCommandHandler,
 		GetMyMarketHistoriesHandler,
 		GetMySpotHistoriesHandler,
-		CancelMyCommandsHandler
+		CancelMyCommandsHandler,
+		GetMyFutureCommandHandler,
+		CancelMyFutureCommandsHandler
 	],
 	exports: [IUserService]
 })

@@ -4,6 +4,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { UserEntity } from '../user/entities/user.entity';
 import { CancelCommand } from './commands/cancel-command.command';
+import { CancelFutureCommand } from './commands/cancel-future-command.command';
 import { CreateCommand } from './commands/create-command.command';
 import { CreateFutureCommand } from './commands/create-future-command.command';
 import { CreateCommandDto } from './dto/create-command.dto';
@@ -24,8 +25,8 @@ export class CommandController {
 
 	@ApiOperation({ description: 'Cancel limit command' })
 	@ApiOkResponse({ description: 'Cancel limit command successfully' })
-	@Delete('limit')
-	deleteLimitCommand(@Param('commandId') commandId: string, @User() user: UserEntity) {
+	@Delete('limit/:id')
+	deleteLimitCommand(@Param('id') commandId: string, @User() user: UserEntity) {
 		return this.commandBus.execute(new CancelCommand({ commandId, user }));
 	}
 
@@ -34,5 +35,12 @@ export class CommandController {
 	@Post('future')
 	createFutureCommand(@Body() data: CreateFutureCommandDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new CreateFutureCommand({ user, data }));
+	}
+
+	@ApiOperation({ description: 'Cancel future command' })
+	@ApiOkResponse({ description: 'Cancel future command successfully' })
+	@Delete('future/:id')
+	deleteFutureCommand(@Param('id') commandId: string, @User() user: UserEntity) {
+		return this.commandBus.execute(new CancelFutureCommand({ commandId, user }));
 	}
 }

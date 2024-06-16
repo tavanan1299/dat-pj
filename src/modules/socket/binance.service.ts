@@ -16,7 +16,8 @@ export class BinanceService {
 	) {}
 
 	initWebSocket() {
-		const ws = new WebSocket(`wss://fstream.binance.com/ws/${this.coins.join('/')}`);
+		// const ws = new WebSocket(`wss://fstream.binance.com/ws/${this.coins.join('/')}`);
+		const ws = new WebSocket(`wss://fstream.binance.com/ws/btcusdt@markPrice`);
 
 		ws.onmessage = (event) => {
 			this.binanceCoin.add('coinPrice', JSON.parse(event.data));

@@ -1,6 +1,6 @@
 import { RoleEntity } from '@app/apis/auth/entities/role.entity';
-import { CreateFutureCommand } from '@app/apis/command/commands/create-future-command.command';
 import { CommandEntity } from '@app/apis/command/entities/command.entity';
+import { FutureCommandEntity } from '@app/apis/command/entities/future-command.entity';
 import { CommandLogEntity } from '@app/apis/log/command-log/entities/command-log.entity';
 import { MarketLogEntity } from '@app/apis/market/entities/market-log.entity';
 import { StackingEntity } from '@app/apis/stacking/entities/stacking.entity';
@@ -39,8 +39,8 @@ export class UserEntity extends BaseEntity {
 	@OneToMany(() => CommandEntity, (command) => command.user)
 	commands!: CommandEntity[];
 
-	@OneToMany(() => CreateFutureCommand, (command) => command.user)
-	futureCommands!: CreateFutureCommand[];
+	@OneToMany(() => FutureCommandEntity, (futureCommand) => futureCommand.user)
+	futureCommands!: FutureCommandEntity[];
 
 	@OneToMany(() => CommandLogEntity, (commandLog) => commandLog.user)
 	commandLogs!: CommandLogEntity[];

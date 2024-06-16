@@ -18,11 +18,6 @@ export class CreateFutureCommandDto {
 	@IsNotEmpty()
 	entryPrice!: number;
 
-	@ApiProperty({ description: 'Margin percentage' })
-	@IsNumber()
-	@IsNotEmpty()
-	marginPercentage!: number;
-
 	@ApiProperty({ description: 'Expect price' })
 	@IsNumber()
 	@IsOptional()
@@ -40,11 +35,6 @@ export class CreateFutureCommandDto {
 	@IsEnum(FutureCommandType)
 	@IsNotEmpty()
 	type!: FutureCommandType;
-
-	@ApiProperty({ description: 'Liquidation Price' })
-	@IsNumber()
-	@IsNotEmpty()
-	liquidationPrice!: number;
 
 	@ApiProperty({ description: 'Leverage' })
 	@IsNumber()

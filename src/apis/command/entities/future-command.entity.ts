@@ -14,9 +14,6 @@ export class FutureCommandEntity extends BaseEntity {
 	@Column({ type: 'float' })
 	entryPrice!: number;
 
-	@Column()
-	marginPercentage!: number;
-
 	@Column({ type: 'float', nullable: true })
 	expectPrice!: number;
 
@@ -26,8 +23,11 @@ export class FutureCommandEntity extends BaseEntity {
 	@Column({ type: 'enum', enum: FutureCommandType })
 	type!: FutureCommandType;
 
-	@Column({ type: 'float' })
-	liquidationPrice!: number;
+	@Column({ default: true })
+	isEntry!: boolean;
+
+	@Column({ nullable: true })
+	lessThanEntryPrice!: boolean;
 
 	@Column({ type: 'float' })
 	leverage!: number;
@@ -35,7 +35,7 @@ export class FutureCommandEntity extends BaseEntity {
 	@Column({ nullable: true })
 	userId!: string;
 
-	@ManyToOne(() => UserEntity, (user) => user.commands)
+	@ManyToOne(() => UserEntity, (user) => user.futureCommands)
 	@JoinColumn({ name: 'userId', referencedColumnName: 'id' })
 	user!: UserEntity;
 }

@@ -3,8 +3,10 @@ import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { CancelMyCommands } from './commands/cancel-my-commands.command';
+import { CancelMyFutureCommands } from './commands/cancel-my-future-commands.command';
 import { GetAllUserPaginatedCommand } from './commands/get-all-user-paginated.command';
 import { GetMyCommandCommand } from './commands/get-my-command.command';
+import { GetMyFutureCommandCommand } from './commands/get-my-future-command.command';
 import { GetMyMarketHistoriesCommand } from './commands/get-my-market-histories.command';
 import { GetMySpotHistoriesCommand } from './commands/get-my-spot-histories.command';
 import { GetMyStacksCommand } from './commands/get-my-stacks.command';
@@ -56,7 +58,7 @@ export class UserController {
 
 	@ApiOperation({ description: 'Get my transaction history' })
 	@ApiOkResponse({ description: 'Get my transaction history successfully' })
-	@Get('spot-history/me')
+	@Get('limit-history/me')
 	getMySpotHistories(@Query() query: PaginationDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new GetMySpotHistoriesCommand({ query, user }));
 	}
@@ -68,9 +70,9 @@ export class UserController {
 		return this.commandBus.execute(new GetMyStacksCommand({ query, user }));
 	}
 
-	@ApiOperation({ description: 'Get my command' })
-	@ApiOkResponse({ description: 'Get my command successfully' })
-	@Get('command/me')
+	@ApiOperation({ description: 'Get my limit command' })
+	@ApiOkResponse({ description: 'Get my limit command successfully' })
+	@Get('command/limit/me')
 	getMyCommands(@Query() query: PaginationDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new GetMyCommandCommand({ query, user }));
 	}
@@ -89,11 +91,25 @@ export class UserController {
 		return this.commandBus.execute(new GetOneUserByIdCommand({ id }));
 	}
 
-	@ApiOperation({ description: 'Cancel my Commands' })
-	@ApiOkResponse({ description: 'Cancel my Commands successfully' })
-	@Delete('command/me')
+	@ApiOperation({ description: 'Cancel my limit commands' })
+	@ApiOkResponse({ description: 'Cancel my limit commands successfully' })
+	@Delete('command/limit/me')
 	deleteMyCommands(@User() user: UserEntity) {
 		return this.commandBus.execute(new CancelMyCommands({ userId: user.id }));
+	}
+
+	@ApiOperation({ description: 'Get my future command' })
+	@ApiOkResponse({ description: 'Get my future command successfully' })
+	@Get('command/future/me')
+	getMyFutureCommands(@Query() query: PaginationDto, @User() user: UserEntity) {
+		return this.commandBus.execute(new GetMyFutureCommandCommand({ query, user }));
+	}
+
+	@ApiOperation({ description: 'Cancel my limit commands' })
+	@ApiOkResponse({ description: 'Cancel my limit commands successfully' })
+	@Delete('command/future/me')
+	deleteMyFutureCommands(@User() user: UserEntity) {
+		return this.commandBus.execute(new CancelMyFutureCommands({ userId: user.id }));
 	}
 
 	// @Patch(':id')
