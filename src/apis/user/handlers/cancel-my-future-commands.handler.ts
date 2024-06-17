@@ -41,30 +41,6 @@ export class CancelMyFutureCommandsHandler implements ICommandHandler<CancelMyFu
 						command,
 						binanceCoin.data.price
 					);
-
-					// if (binanceCoin.data.price > command.entryPrice) {
-					// 	const winAmount =
-					// 		Math.abs(command.entryPrice - binanceCoin.data.price) *
-					// 			command.leverage +
-					// 		command.quantity;
-					// 	await this.walletService.increase(
-					// 		trx,
-					// 		command.coinName,
-					// 		winAmount,
-					// 		command.userId
-					// 	);
-					// } else {
-					// 	const loseAmount =
-					// 		Math.abs(command.entryPrice - binanceCoin.data.price) *
-					// 			command.leverage -
-					// 		command.quantity;
-					// 	await this.walletService.increase(
-					// 		trx,
-					// 		command.coinName,
-					// 		loseAmount,
-					// 		command.userId
-					// 	);
-					// }
 				}
 
 				await trx.getRepository(CommandEntity).delete({});

@@ -24,3 +24,8 @@ export enum FutureCommandType {
 	LIMIT = 'limit',
 	MARKET = 'market'
 }
+
+export enum FutureCommandOrderType {
+	LONG = 'long',
+	SHORT = 'short'
+}

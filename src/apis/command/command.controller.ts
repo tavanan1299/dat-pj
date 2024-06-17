@@ -1,5 +1,5 @@
 import { ApiController, UseUserGuard, User } from '@app/common';
-import { Body, Controller, Delete, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { UserEntity } from '../user/entities/user.entity';
@@ -7,8 +7,10 @@ import { CancelCommand } from './commands/cancel-command.command';
 import { CancelFutureCommand } from './commands/cancel-future-command.command';
 import { CreateCommand } from './commands/create-command.command';
 import { CreateFutureCommand } from './commands/create-future-command.command';
+import { UpdateFutureCommand } from './commands/update-future-command.command';
 import { CreateCommandDto } from './dto/create-command.dto';
 import { CreateFutureCommandDto } from './dto/create-future-command.dto';
+import { UpdateFutureCommandDto } from './dto/update-future-command.dto';
 
 @ApiController('Command')
 @Controller('command')
@@ -42,5 +44,16 @@ export class CommandController {
 	@Delete('future/:id')
 	deleteFutureCommand(@Param('id') commandId: string, @User() user: UserEntity) {
 		return this.commandBus.execute(new CancelFutureCommand({ commandId, user }));
+	}
+
+	@ApiOperation({ description: 'Update future command' })
+	@ApiOkResponse({ description: 'Update future command successfully' })
+	@Patch('future/:id')
+	UpdateFutureCommand(
+		@Param('id') commandId: string,
+		@Body() data: UpdateFutureCommandDto,
+		@User() user: UserEntity
+	) {
+		return this.commandBus.execute(new UpdateFutureCommand({ commandId, data, user }));
 	}
 }

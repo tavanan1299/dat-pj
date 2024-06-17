@@ -13,6 +13,7 @@ import { CancelCommandHandler } from './handlers/cancel-command.handler';
 import { CancelFutureCommandHandler } from './handlers/cancel-future-command.handler';
 import { CreateCommandHandler } from './handlers/create-command.handler';
 import { CreateFutureCommandHandler } from './handlers/create-future-command.handler';
+import { UpdateFutureCommandHandler } from './handlers/update-future-command.handler';
 
 @Module({
 	imports: [TypeOrmModule.forFeature([CommandEntity, FutureCommandEntity]), WalletModule],
@@ -30,6 +31,7 @@ import { CreateFutureCommandHandler } from './handlers/create-future-command.han
 		CancelCommandHandler,
 		CreateFutureCommandHandler,
 		CancelFutureCommandHandler,
+		UpdateFutureCommandHandler,
 		CommandProcessor
 	],
 	exports: [ICommand]

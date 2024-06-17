@@ -37,12 +37,7 @@ export class CreateFutureCommandHandler implements ICommandHandler<CreateFutureC
 		const minusQuantity = +data.quantity / +data.leverage;
 
 		await this.entityManager.transaction(async (trx) => {
-			await this.walletService.decrease(
-				this.entityManager,
-				DEFAULT_CURRENCY,
-				minusQuantity,
-				user.id
-			);
+			await this.walletService.decrease(trx, DEFAULT_CURRENCY, minusQuantity, user.id);
 
 			await trx
 				.getRepository(FutureCommandEntity)

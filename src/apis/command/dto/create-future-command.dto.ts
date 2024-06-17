@@ -1,4 +1,4 @@
-import { FutureCommandType } from '@app/common/enums/status.enum';
+import { FutureCommandOrderType, FutureCommandType } from '@app/common/enums/status.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
@@ -35,6 +35,14 @@ export class CreateFutureCommandDto {
 	@IsEnum(FutureCommandType)
 	@IsNotEmpty()
 	type!: FutureCommandType;
+
+	@ApiProperty({
+		description: 'Order type',
+		example: `${FutureCommandOrderType.LONG}|${FutureCommandOrderType.SHORT}`
+	})
+	@IsEnum(FutureCommandOrderType)
+	@IsNotEmpty()
+	orderType!: FutureCommandOrderType;
 
 	@ApiProperty({ description: 'Leverage' })
 	@IsNumber()

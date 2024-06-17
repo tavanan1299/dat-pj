@@ -44,30 +44,6 @@ export class CancelFutureCommandHandler implements ICommandHandler<CancelFutureC
 						binanceCoin.data.price
 					);
 
-					// if (binanceCoin.data.price > currentCommand.entryPrice) {
-					// 	const winAmount =
-					// 		Math.abs(currentCommand.entryPrice - binanceCoin.data.price) *
-					// 			currentCommand.leverage +
-					// 		currentCommand.quantity;
-					// 	await this.walletService.increase(
-					// 		trx,
-					// 		currentCommand.coinName,
-					// 		winAmount,
-					// 		currentCommand.userId
-					// 	);
-					// } else {
-					// 	const loseAmount =
-					// 		Math.abs(currentCommand.entryPrice - binanceCoin.data.price) *
-					// 			currentCommand.leverage -
-					// 		currentCommand.quantity;
-					// 	await this.walletService.increase(
-					// 		trx,
-					// 		currentCommand.coinName,
-					// 		loseAmount,
-					// 		currentCommand.userId
-					// 	);
-					// }
-
 					await trx.getRepository(FutureCommandEntity).remove(currentCommand);
 
 					return 'Cancel Command successfully';

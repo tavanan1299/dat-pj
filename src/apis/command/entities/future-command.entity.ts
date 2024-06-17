@@ -1,6 +1,6 @@
 import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { BaseEntity } from '@app/common';
-import { FutureCommandType } from '@app/common/enums/status.enum';
+import { FutureCommandOrderType, FutureCommandType } from '@app/common/enums/status.enum';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity({ name: 'futureCommand' })
@@ -22,6 +22,9 @@ export class FutureCommandEntity extends BaseEntity {
 
 	@Column({ type: 'enum', enum: FutureCommandType })
 	type!: FutureCommandType;
+
+	@Column({ type: 'enum', enum: FutureCommandOrderType, default: FutureCommandOrderType.LONG })
+	orderType!: FutureCommandOrderType;
 
 	@Column({ default: true })
 	isEntry!: boolean;
