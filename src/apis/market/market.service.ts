@@ -10,8 +10,8 @@ export class MarketService extends IMarket {
 
 	constructor(
 		@InjectRepository(MarketLogEntity)
-		private readonly verifyuserRepo: Repository<MarketLogEntity>
+		private readonly MarketLogRepo: Repository<MarketLogEntity>
 	) {
-		super(verifyuserRepo);
+		super(MarketLogRepo);
 	}
 }
