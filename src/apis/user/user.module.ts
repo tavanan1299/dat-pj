@@ -1,3 +1,4 @@
+import { FirebaseService } from '@app/modules/firebase/firebase.service';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ICommand } from '../command/command.interface';
@@ -15,6 +16,10 @@ import { WalletLogService } from '../log/wallet-log/wallet-log.service';
 import { MarketLogEntity } from '../market/entities/market-log.entity';
 import { IMarket } from '../market/market.interface';
 import { MarketService } from '../market/market.service';
+import { NotificationReceives } from '../notification/entities/notification-receive.entity';
+import { Notification } from '../notification/entities/notification.entity';
+import { INotification } from '../notification/notification.interface';
+import { NotificationService } from '../notification/notification.service';
 import { StackingEntity } from '../stacking/entities/stacking.entity';
 import { IStacking } from '../stacking/stacking.interface';
 import { StackingService } from '../stacking/stacking.service';
@@ -60,7 +65,9 @@ import { UserService } from './user.service';
 			WalletLogEntity,
 			CommandEntity,
 			CommandLogEntity,
-			FutureCommandEntity
+			FutureCommandEntity,
+			Notification,
+			NotificationReceives
 		])
 	],
 	controllers: [UserController],
@@ -97,6 +104,10 @@ import { UserService } from './user.service';
 			provide: IWallet,
 			useClass: WalletService
 		},
+		{
+			provide: INotification,
+			useClass: NotificationService
+		},
 		CreateUserHandler,
 		GetAllUserPaginatedHandler,
 		GetOneUserByIdHandler,
@@ -110,7 +121,8 @@ import { UserService } from './user.service';
 		GetMySpotHistoriesHandler,
 		CancelMyCommandsHandler,
 		GetMyFutureCommandHandler,
-		CancelMyFutureCommandsHandler
+		CancelMyFutureCommandsHandler,
+		FirebaseService
 	],
 	exports: [IUserService]
 })

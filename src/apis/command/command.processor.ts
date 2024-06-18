@@ -165,6 +165,13 @@ export class CommandProcessor extends WorkerHost {
 
 				const { id, createdAt, updatedAt, deletedAt, ...rest } = command;
 
+				await this.walletService.increase(
+					trx,
+					DEFAULT_CURRENCY,
+					command.totalPay,
+					command.userId
+				);
+
 				// add logs
 				await trx.getRepository(CommandLogEntity).save({
 					...rest,
