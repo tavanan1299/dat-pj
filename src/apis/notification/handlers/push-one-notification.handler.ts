@@ -25,7 +25,7 @@ export class PushOneNotificationByIdHandler
 
 		if (user.role.name !== ROLES.ADMIN) return 'User not permission';
 
-		await this.notificationService.sendNotification(DATA_NOTI, user.id, {
+		await this.notificationService.sendNotification(DATA_NOTI, data.userId, {
 			body: data.content
 		});
 
