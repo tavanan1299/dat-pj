@@ -1,4 +1,5 @@
 import { RefreshTokenEntity } from '@app/apis/user/entities/refreshToken.entity';
+import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -20,6 +21,10 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
 
 		const token = await RefreshTokenEntity.findOne({
 			where: { userId: data.user.id, refresh: hashToken }
+		});
+
+		await UserEntity.update(data.user.id, {
+			fcmToken: undefined
 		});
 
 		if (token) {

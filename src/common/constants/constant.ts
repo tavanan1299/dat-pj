@@ -9,3 +9,23 @@ export const INTEREST_RATE = {
 	5: 20,
 	6: 25
 }; // lợi nhuận 1 tháng 5%, tương ứng cho 2, 3, 4, ...
+
+export const NotificationEntity = {
+	TRANSACTION: 'transaction',
+	NOTIFICATION: 'notification'
+} as const;
+
+export const NotificationEntityKind = {
+	CREATE: 'create',
+	UPDATE: 'update'
+} as const;
+
+export const NotificationType = {
+	REMINDER: 'reminder',
+	ANNOUNCEMENT: 'announcement'
+} as const;
+
+export const NotificationMessage = {
+	BALANCE_FLUCTUATIONS: 'Balance fluctuations',
+	MESSAGE_ADMIN: 'Message from admin'
+} as const;

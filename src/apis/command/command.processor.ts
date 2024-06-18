@@ -21,7 +21,6 @@ export class CommandProcessor extends WorkerHost {
 	async process(job: Job<any, any, string>): Promise<any> {
 		switch (job.name) {
 			case 'coinPrice':
-				// console.log(job.data);
 				const data = await this.matchCommand(job.data);
 				return data;
 

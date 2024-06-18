@@ -13,6 +13,9 @@ import { AppController } from './app.controller';
 import { providers } from './app.provider';
 import { QueueModule } from './modules/bull/bull.module';
 
+import * as firebase from 'firebase-admin';
+import { FirebaseModule } from './modules/firebase/firebase.module';
+
 @Module({
 	imports: [
 		ConfigModule,
@@ -22,19 +25,26 @@ import { QueueModule } from './modules/bull/bull.module';
 		EventEmitterModule.forRoot({
 			maxListeners: 20
 		}),
+		BullModule.registerQueue({
+			name: 'binance:coin',
+			prefix: 'trade-coin'
+		}),
 		I18NModule,
 		QueueModule,
 		CqrsModule.forRoot(),
 		ApiModule,
-		BullModule.registerQueue({
-			name: 'binance:coin',
-			prefix: 'trade-coin'
-		})
+		FirebaseModule
 	],
 	controllers: [AppController],
 	providers
 })
 export class AppModule implements NestModule {
+	constructor() {
+		firebase.initializeApp({
+			credential: firebase.credential.cert('src/modules/firebase/firebase-sdk.json')
+		});
+	}
+
 	configure(consumer: MiddlewareConsumer) {
 		consumer.apply(LoggerMiddleware).forRoutes('*');
 	}

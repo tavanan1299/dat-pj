@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
+import { NotificationModule } from '../notification/notification.module';
 import { UserEntity } from '../user/entities/user.entity';
 import { VerifyUserEntity } from '../verify-user/entities/verify-user.entity';
 import { PendingWalletEntity } from './entities/pending-wallet.entity';
@@ -22,7 +23,8 @@ import { WalletService } from './wallet.service';
 			WalletEntity,
 			PendingWalletEntity,
 			WalletLogEntity
-		])
+		]),
+		NotificationModule
 	],
 	controllers: [WalletController],
 	providers: [
