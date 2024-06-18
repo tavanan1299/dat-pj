@@ -1,9 +1,8 @@
 import { UserEntity } from '@app/apis/user/entities/user.entity';
-import { PushNotificationDto } from '../dto/push-notification.dto';
+import { PushNotificationForOneUser } from '../dto/push-notification-for-one-user.dto';
 
 export class PushOneNotificationByIdCommand {
-	id!: string;
-	data!: PushNotificationDto;
+	data!: PushNotificationForOneUser;
 	user!: UserEntity;
 
 	constructor(data: PushOneNotificationByIdCommand) {

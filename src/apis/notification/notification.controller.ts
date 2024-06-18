@@ -7,6 +7,7 @@ import { GetAllNotificationPaginatedCommand } from './command/get-all-notificati
 import { GetOneNotificationByIdCommand } from './command/get-onenotification.command';
 import { PushAllNotificationCommand } from './command/push-all-notification.command';
 import { PushOneNotificationByIdCommand } from './command/push-one-notification.command';
+import { PushNotificationForOneUser } from './dto/push-notification-for-one-user.dto';
 import { PushNotificationDto } from './dto/push-notification.dto';
 import { INotification } from './notification.interface';
 import { NotificationProcessor } from './notification.processor';
@@ -39,7 +40,7 @@ export class NotificationController {
 
 	@ApiOperation({ description: 'Push all notification' })
 	@ApiOkResponse({ description: 'Push all notification successfully' })
-	@Post('sendAllNotification')
+	@Post('send-all')
 	pushAll(@Body() pushNotification: PushNotificationDto, @User() user: UserEntity) {
 		return this.commandBus.execute(
 			new PushAllNotificationCommand({ data: pushNotification, user })
@@ -62,14 +63,10 @@ export class NotificationController {
 
 	@ApiOperation({ description: 'Push one notification' })
 	@ApiOkResponse({ description: 'Push one notification successfully' })
-	@Post(':id')
-	pushOne(
-		@Body() pushNotification: PushNotificationDto,
-		@Param('id') id: string,
-		@User() user: UserEntity
-	) {
+	@Post('send-one')
+	pushOne(@Body() pushNotification: PushNotificationForOneUser, @User() user: UserEntity) {
 		return this.commandBus.execute(
-			new PushOneNotificationByIdCommand({ id, data: pushNotification, user })
+			new PushOneNotificationByIdCommand({ data: pushNotification, user })
 		);
 	}
 }
