@@ -23,7 +23,7 @@ export class UserService extends IUserService {
 		}
 		const comparePassword = await verify(user.password, password);
 		if (!comparePassword) {
-			throw new UnauthorizedException('Password Incorrect');
+			throw new UnauthorizedException('Email or password incorrect');
 		}
 		return user;
 	}

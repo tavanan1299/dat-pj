@@ -2,6 +2,7 @@ import { RoleEntity } from '@app/apis/auth/entities/role.entity';
 import { CommandEntity } from '@app/apis/command/entities/command.entity';
 import { MarketLogEntity } from '@app/apis/market/entities/market-log.entity';
 import { NotificationReceives } from '@app/apis/notification/entities/notification-receive.entity';
+import { CommandLogEntity } from '@app/apis/log/command-log/entities/command-log.entity';
 import { StackingEntity } from '@app/apis/stacking/entities/stacking.entity';
 import { VerifyUserEntity } from '@app/apis/verify-user/entities/verify-user.entity';
 import { PendingWalletEntity } from '@app/apis/wallet/entities/pending-wallet.entity';
@@ -40,6 +41,9 @@ export class UserEntity extends BaseEntity {
 
 	@OneToMany(() => CommandEntity, (command) => command.user)
 	commands!: CommandEntity[];
+
+	@OneToMany(() => CommandLogEntity, (commandLog) => commandLog.user)
+	commandLogs!: CommandLogEntity[];
 
 	@OneToMany(() => PendingWalletEntity, (pendingWallet) => pendingWallet.user)
 	pendingWallets!: PendingWalletEntity[];

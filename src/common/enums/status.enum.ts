@@ -8,7 +8,7 @@ export enum CommandType {
 	SELL = 'sell'
 }
 
-export enum MarketLogStatus {
+export enum CommonStatus {
 	FAIL = 'fail',
 	SUCCESS = 'success'
 }
