@@ -13,3 +13,23 @@ export const INTEREST_RATE = {
 export const DEFAULT_CURRENCY = 'usdt';
 
 export const BINANCE_API = 'https://api.binance.com/api/v3/ticker/price?symbol=';
+
+export const NotificationEntity = {
+	TRANSACTION: 'transaction',
+	NOTIFICATION: 'notification'
+} as const;
+
+export const NotificationEntityKind = {
+	CREATE: 'create',
+	UPDATE: 'update'
+} as const;
+
+export const NotificationType = {
+	REMINDER: 'reminder',
+	ANNOUNCEMENT: 'announcement'
+} as const;
+
+export const NotificationMessage = {
+	BALANCE_FLUCTUATIONS: 'Balance fluctuations',
+	MESSAGE_ADMIN: 'Message from admin'
+} as const;

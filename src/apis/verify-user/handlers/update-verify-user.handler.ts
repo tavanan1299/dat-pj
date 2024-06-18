@@ -23,7 +23,7 @@ export class UpdateVerifyUserHandler implements ICommandHandler<UpdateVerifyUser
 			if (auth?.verify.isVerified) {
 				throw new BadRequestException('Cant not update when admin approved');
 			}
-			await this.verifyUserService.updateById(auth?.verify.id, { ...data, user });
+			await this.verifyUserService.updateById(auth?.verify.id, { ...data });
 		} else {
 			await this.verifyUserService.create({ ...data, user });
 		}
