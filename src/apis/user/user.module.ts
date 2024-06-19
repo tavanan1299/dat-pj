@@ -10,6 +10,7 @@ import { FutureCommandService } from '../command/future-command.service';
 import { ICommandLog } from '../log/command-log/command-log.interface';
 import { CommandLogService } from '../log/command-log/command-log.service';
 import { CommandLogEntity } from '../log/command-log/entities/command-log.entity';
+import { FutureCommandLogEntity } from '../log/future-command-log/entities/future-command-log.entity';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
 import { IWalletLog } from '../log/wallet-log/wallet-log.interface';
 import { WalletLogService } from '../log/wallet-log/wallet-log.service';
@@ -67,7 +68,8 @@ import { UserService } from './user.service';
 			CommandLogEntity,
 			FutureCommandEntity,
 			Notification,
-			NotificationReceives
+			NotificationReceives,
+			FutureCommandLogEntity
 		])
 	],
 	controllers: [UserController],

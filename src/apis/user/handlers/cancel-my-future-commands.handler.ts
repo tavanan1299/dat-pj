@@ -1,5 +1,4 @@
 import { ICommand } from '@app/apis/command/command.interface';
-import { CommandEntity } from '@app/apis/command/entities/command.entity';
 import { FutureCommandEntity } from '@app/apis/command/entities/future-command.entity';
 import { IFutureCommand } from '@app/apis/command/future-command.interface';
 import { BINANCE_API } from '@app/common/constants/constant';
@@ -41,9 +40,9 @@ export class CancelMyFutureCommandsHandler implements ICommandHandler<CancelMyFu
 						command,
 						binanceCoin.data.price
 					);
-				}
 
-				await trx.getRepository(CommandEntity).delete({});
+					await trx.getRepository(FutureCommandEntity).delete(command.id);
+				}
 
 				return 'Cancel my command successfully';
 			});

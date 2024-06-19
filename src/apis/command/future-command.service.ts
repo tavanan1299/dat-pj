@@ -1,8 +1,9 @@
 import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
-import { FutureCommandOrderType } from '@app/common/enums/status.enum';
+import { CommonStatus, FutureCommandOrderType } from '@app/common/enums/status.enum';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
+import { FutureCommandLogEntity } from '../log/future-command-log/entities/future-command-log.entity';
 import { IWallet } from '../wallet/wallet.interface';
 import { FutureCommandEntity } from './entities/future-command.entity';
 import { IFutureCommand } from './future-command.interface';
@@ -20,6 +21,8 @@ export class FutureCommandService extends IFutureCommand {
 	}
 
 	async handleFutureCommand(trx: EntityManager, command: FutureCommandEntity, price: number) {
+		const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
+			command;
 		if (command.orderType === FutureCommandOrderType.LONG) {
 			if (price > command.entryPrice) {
 				const winAmount = this.calcAmount(
@@ -71,6 +74,12 @@ export class FutureCommandService extends IFutureCommand {
 				await this.walletService.increase(trx, DEFAULT_CURRENCY, winAmount, command.userId);
 			}
 		}
+		// add logs
+		await trx.getRepository(FutureCommandLogEntity).save({
+			...rest,
+			status: CommonStatus.SUCCESS,
+			desc: 'Cancel'
+		});
 	}
 
 	calcAmount(

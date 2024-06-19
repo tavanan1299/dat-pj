@@ -1,7 +1,8 @@
+import { CommandLogEntity } from '@app/apis/log/command-log/entities/command-log.entity';
 import { IWallet } from '@app/apis/wallet/wallet.interface';
 import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
 import { ROLES } from '@app/common/constants/role.constant';
-import { CommandType } from '@app/common/enums/status.enum';
+import { CommandType, CommonStatus } from '@app/common/enums/status.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { EntityManager } from 'typeorm';
@@ -52,6 +53,15 @@ export class CancelCommandHandler implements ICommandHandler<CancelCommand> {
 					}
 
 					await trx.getRepository(CommandEntity).remove(currentCommand);
+
+					const { id, createdAt, updatedAt, deletedAt, ...rest } = currentCommand;
+
+					// add logs
+					await trx.getRepository(CommandLogEntity).save({
+						...rest,
+						status: CommonStatus.SUCCESS,
+						desc: 'Cancel'
+					});
 
 					return 'Cancel Command successfully';
 				}

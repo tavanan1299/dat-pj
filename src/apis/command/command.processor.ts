@@ -11,6 +11,7 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { CommandLogEntity } from '../log/command-log/entities/command-log.entity';
+import { FutureCommandLogEntity } from '../log/future-command-log/entities/future-command-log.entity';
 import { WalletEntity } from '../wallet/entities/wallet.entity';
 import { IWallet } from '../wallet/wallet.interface';
 import { CommandEntity } from './entities/command.entity';
@@ -214,6 +215,8 @@ export class CommandProcessor extends WorkerHost {
 
 	async handleLiquidation(data: Record<string, any>[], price: number) {
 		for (const command of data) {
+			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
+				command;
 			if (command.orderType === FutureCommandOrderType.LONG && price < command.entryPrice) {
 				await this.entityManager.transaction(async (trx) => {
 					const usdt = await trx
@@ -238,6 +241,13 @@ export class CommandProcessor extends WorkerHost {
 						);
 
 						await trx.getRepository(FutureCommandEntity).delete(command.id);
+
+						// add logs
+						await trx.getRepository(FutureCommandLogEntity).save({
+							...rest,
+							status: CommonStatus.SUCCESS,
+							desc: 'Liquidation'
+						});
 						return;
 					}
 
@@ -250,6 +260,13 @@ export class CommandProcessor extends WorkerHost {
 						);
 
 						await trx.getRepository(FutureCommandEntity).delete(command.id);
+
+						// add logs
+						await trx.getRepository(FutureCommandLogEntity).save({
+							...rest,
+							status: CommonStatus.SUCCESS,
+							desc: 'Liquidation'
+						});
 						return;
 					}
 				});
@@ -279,6 +296,13 @@ export class CommandProcessor extends WorkerHost {
 						);
 
 						await trx.getRepository(FutureCommandEntity).delete(command.id);
+
+						// add logs
+						await trx.getRepository(FutureCommandLogEntity).save({
+							...rest,
+							status: CommonStatus.SUCCESS,
+							desc: 'Liquidation'
+						});
 						return;
 					}
 
@@ -291,6 +315,13 @@ export class CommandProcessor extends WorkerHost {
 						);
 
 						await trx.getRepository(FutureCommandEntity).delete(command.id);
+
+						// add logs
+						await trx.getRepository(FutureCommandLogEntity).save({
+							...rest,
+							status: CommonStatus.SUCCESS,
+							desc: 'Liquidation'
+						});
 						return;
 					}
 				});
@@ -302,6 +333,8 @@ export class CommandProcessor extends WorkerHost {
 
 	async handleFutureWin(data: Record<string, any>[]) {
 		for (const command of data) {
+			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
+				command;
 			if (command.orderType === FutureCommandOrderType.LONG) {
 				const winAmount = this.futureCommandService.calcAmount(
 					command.expectPrice,
@@ -320,6 +353,13 @@ export class CommandProcessor extends WorkerHost {
 					);
 
 					await trx.getRepository(FutureCommandEntity).delete(command.id);
+
+					// add logs
+					await trx.getRepository(FutureCommandLogEntity).save({
+						...rest,
+						status: CommonStatus.SUCCESS,
+						desc: 'Win'
+					});
 
 					return;
 				});
@@ -343,6 +383,13 @@ export class CommandProcessor extends WorkerHost {
 					);
 
 					await trx.getRepository(FutureCommandEntity).delete(command.id);
+
+					// add logs
+					await trx.getRepository(FutureCommandLogEntity).save({
+						...rest,
+						status: CommonStatus.SUCCESS,
+						desc: 'Win'
+					});
 
 					return;
 				});
@@ -354,6 +401,9 @@ export class CommandProcessor extends WorkerHost {
 
 	async handleFutureLose(data: Record<string, any>[], price: number) {
 		for (const command of data) {
+			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
+				command;
+
 			if (command.orderType === FutureCommandOrderType.LONG) {
 				await this.entityManager.transaction(async (trx) => {
 					const usdt = await trx
@@ -378,6 +428,12 @@ export class CommandProcessor extends WorkerHost {
 						);
 
 						await trx.getRepository(FutureCommandEntity).delete(command.id);
+						// add logs
+						await trx.getRepository(FutureCommandLogEntity).save({
+							...rest,
+							status: CommonStatus.SUCCESS,
+							desc: 'Liquidation'
+						});
 						return;
 					}
 
@@ -389,6 +445,13 @@ export class CommandProcessor extends WorkerHost {
 					);
 
 					await trx.getRepository(FutureCommandEntity).delete(command.id);
+
+					// add logs
+					await trx.getRepository(FutureCommandLogEntity).save({
+						...rest,
+						status: CommonStatus.SUCCESS,
+						desc: 'Lose'
+					});
 					return;
 				});
 			}
@@ -417,6 +480,13 @@ export class CommandProcessor extends WorkerHost {
 						);
 
 						await trx.getRepository(FutureCommandEntity).delete(command.id);
+
+						// add logs
+						await trx.getRepository(FutureCommandLogEntity).save({
+							...rest,
+							status: CommonStatus.SUCCESS,
+							desc: 'Liquidation'
+						});
 						return;
 					}
 
@@ -428,6 +498,13 @@ export class CommandProcessor extends WorkerHost {
 					);
 
 					await trx.getRepository(FutureCommandEntity).delete(command.id);
+
+					// add logs
+					await trx.getRepository(FutureCommandLogEntity).save({
+						...rest,
+						status: CommonStatus.SUCCESS,
+						desc: 'Lose'
+					});
 					return;
 				});
 			}

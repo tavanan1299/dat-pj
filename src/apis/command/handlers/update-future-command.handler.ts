@@ -30,7 +30,7 @@ export class UpdateFutureCommandHandler implements ICommandHandler<UpdateFutureC
 		if (futureCommand.isEntry) {
 			throw new BadRequestException('This command already entry');
 		}
-		console.log(futureCommand.userId, user.id);
+
 		if (futureCommand.userId === user.id || user.role.name === ROLES.ADMIN) {
 			await this.entityManager.transaction(async (trx) => {
 				const rollbackQuantity = futureCommand.quantity / futureCommand.leverage;
