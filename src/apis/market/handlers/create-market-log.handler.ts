@@ -1,6 +1,8 @@
 import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.entity';
 import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
+import { IWallet } from '@app/apis/wallet/wallet.interface';
+import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
 import { CommandType, CommonStatus, MarketLogType } from '@app/common/enums/status.enum';
 import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
@@ -16,7 +18,8 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 
 	constructor(
 		@InjectEntityManager()
-		private readonly entityManager: EntityManager
+		private readonly entityManager: EntityManager,
+		private readonly walletService: IWallet
 	) {}
 
 	async execute(command: CreateMarketLogCommand) {
@@ -49,11 +52,18 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 			switch (data.type) {
 				case CommandType.BUY:
 					await this.entityManager.transaction(async (trx) => {
-						await this.updateWallet(
+						await this.walletService.decrease(
 							trx,
-							user.id,
+							DEFAULT_CURRENCY,
+							data.totalPay,
+							currentUser.id
+						);
+
+						await this.walletService.increase(
+							trx,
 							data.coinName,
-							currentWallet?.quantity + data.quantity
+							data.quantity,
+							currentUser.id
 						);
 
 						await trx.getRepository(MarketLogEntity).save(
@@ -87,11 +97,18 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 						throw new BadRequestException('Your wallet is not enough');
 					}
 					await this.entityManager.transaction(async (trx) => {
-						await this.updateWallet(
+						await this.walletService.decrease(
 							trx,
-							user.id,
 							data.coinName,
-							currentWallet?.quantity - data.quantity
+							data.quantity,
+							currentUser.id
+						);
+
+						await this.walletService.increase(
+							trx,
+							DEFAULT_CURRENCY,
+							data.totalPay,
+							currentUser.id
 						);
 
 						await trx.getRepository(MarketLogEntity).save(

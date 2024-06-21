@@ -4,6 +4,7 @@ import { ApiController, UseUserGuard, User } from '@common';
 import {
 	Body,
 	Controller,
+	Headers,
 	HttpCode,
 	HttpStatus,
 	Post,
@@ -46,8 +47,12 @@ export class AuthController {
 	@UseGuards(AuthGuard(AuthStrategy.USER_LOCAL))
 	@Post('user/login')
 	@HttpCode(200)
-	loginUser(@Body() _loginUserDto: LoginUserDto, @User() user: UserEntity) {
-		return this.commandBus.execute(new LoginCommand({ user }));
+	loginUser(
+		@Body() _loginUserDto: LoginUserDto,
+		@Headers('fcmToken') fcmToken: string,
+		@User() user: UserEntity
+	) {
+		return this.commandBus.execute(new LoginCommand({ user, data: _loginUserDto, fcmToken }));
 	}
 
 	@SkipAuth()

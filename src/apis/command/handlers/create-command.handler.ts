@@ -1,5 +1,5 @@
-import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
 import { IWallet } from '@app/apis/wallet/wallet.interface';
+import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
 import { CommandType } from '@app/common/enums/status.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -7,7 +7,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EntityManager } from 'typeorm';
 import { ICommand } from '../command.interface';
 import { CreateCommand } from '../commands/create-command.command';
-import { CreateCommandDto } from '../dto/create-command.dto';
+import { CommandEntity } from '../entities/command.entity';
 
 @CommandHandler(CreateCommand)
 export class CreateCommandHandler implements ICommandHandler<CreateCommand> {
@@ -24,54 +24,28 @@ export class CreateCommandHandler implements ICommandHandler<CreateCommand> {
 		this.logger.debug('execute');
 
 		const { data, user } = command;
+		await this.entityManager.transaction(async (trx) => {
+			if (data.type === CommandType.BUY) {
+				await trx.getRepository(CommandEntity).save({
+					...data,
+					userId: user.id,
+					lossStopPrice: undefined
+				});
 
-		if (data.type === CommandType.SELL) {
-			await this.validateSellCommand(data, user);
-		}
+				await this.walletService.decrease(trx, DEFAULT_CURRENCY, data.totalPay, user.id);
+			} else {
+				if (!data.lossStopPrice) {
+					throw new BadRequestException('Field lossStopPrice is required');
+				}
 
-		if (data.type === CommandType.BUY) {
-			await this.commandService.create({
-				...data,
-				userId: user.id,
-				lossStopPrice: undefined
-			});
-		} else {
-			await this.commandService.create({ ...data, userId: user.id });
-			await this.walletService.decrease(
-				this.entityManager,
-				data.coinName,
-				data.quantity,
-				user.id
-			);
-		}
+				await trx.getRepository(CommandEntity).save({ ...data, userId: user.id });
 
-		this.eventEmitter.emit('command.created', data.coinName);
+				await this.walletService.decrease(trx, data.coinName, data.quantity, user.id);
+			}
+
+			this.eventEmitter.emit('command.created', data.coinName);
+		});
 
 		return 'Create Command successfully';
-	}
-
-	private async validateSellCommand(data: CreateCommandDto, user: User) {
-		if (!data.lossStopPrice) {
-			throw new BadRequestException('Field lossStopPrice is required');
-		}
-
-		const wallet = await this.findUserWallet(data.coinName, user.id);
-
-		if (!wallet) {
-			throw new BadRequestException('Wallet not found');
-		}
-
-		if (wallet.quantity < data.quantity) {
-			throw new BadRequestException('The balance in the wallet is not enough');
-		}
-	}
-
-	private async findUserWallet(coinName: string, userId: string): Promise<WalletEntity | null> {
-		return WalletEntity.findOne({
-			where: {
-				coinName,
-				userId
-			}
-		});
 	}
 }

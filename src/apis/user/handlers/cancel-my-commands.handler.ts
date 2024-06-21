@@ -1,7 +1,9 @@
 import { ICommand } from '@app/apis/command/command.interface';
 import { CommandEntity } from '@app/apis/command/entities/command.entity';
-import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
-import { CommandType } from '@app/common/enums/status.enum';
+import { CommandLogEntity } from '@app/apis/log/command-log/entities/command-log.entity';
+import { IWallet } from '@app/apis/wallet/wallet.interface';
+import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
+import { CommandType, CommonStatus } from '@app/common/enums/status.enum';
 import { Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { EntityManager } from 'typeorm';
@@ -13,7 +15,8 @@ export class CancelMyCommandsHandler implements ICommandHandler<CancelMyCommands
 
 	constructor(
 		private readonly commandService: ICommand,
-		private readonly entityManager: EntityManager
+		private readonly entityManager: EntityManager,
+		private readonly walletService: IWallet
 	) {}
 
 	async execute(command: CancelMyCommands) {
@@ -28,23 +31,32 @@ export class CancelMyCommandsHandler implements ICommandHandler<CancelMyCommands
 				});
 
 				for (const command of commands) {
-					if (command?.type === CommandType.SELL) {
-						const wallet = await trx.getRepository(WalletEntity).findOne({
-							where: {
-								coinName: command.coinName,
-								userId: userId
-							}
-						});
-
-						if (wallet) {
-							await trx.getRepository(WalletEntity).update(wallet.id, {
-								quantity: +wallet.quantity + +command.quantity
-							});
-						}
+					if (command.type === CommandType.SELL) {
+						await this.walletService.increase(
+							trx,
+							command.coinName,
+							command.quantity,
+							userId
+						);
+					} else {
+						await this.walletService.increase(
+							trx,
+							DEFAULT_CURRENCY,
+							command.totalPay,
+							userId
+						);
 					}
-				}
+					await trx.getRepository(CommandEntity).delete(command.id);
 
-				await trx.getRepository(CommandEntity).delete({});
+					const { id, createdAt, updatedAt, deletedAt, ...rest } = command;
+
+					// add logs
+					await trx.getRepository(CommandLogEntity).save({
+						...rest,
+						status: CommonStatus.SUCCESS,
+						desc: 'Cancel'
+					});
+				}
 
 				return 'Cancel my command successfully';
 			});

@@ -1,7 +1,10 @@
 import { RoleEntity } from '@app/apis/auth/entities/role.entity';
 import { CommandEntity } from '@app/apis/command/entities/command.entity';
+import { FutureCommandEntity } from '@app/apis/command/entities/future-command.entity';
 import { CommandLogEntity } from '@app/apis/log/command-log/entities/command-log.entity';
+import { FutureCommandLogEntity } from '@app/apis/log/future-command-log/entities/future-command-log.entity';
 import { MarketLogEntity } from '@app/apis/market/entities/market-log.entity';
+import { NotificationReceives } from '@app/apis/notification/entities/notification-receive.entity';
 import { StackingEntity } from '@app/apis/stacking/entities/stacking.entity';
 import { VerifyUserEntity } from '@app/apis/verify-user/entities/verify-user.entity';
 import { PendingWalletEntity } from '@app/apis/wallet/entities/pending-wallet.entity';
@@ -35,11 +38,20 @@ export class UserEntity extends BaseEntity {
 	@OneToMany(() => StackingEntity, (stack) => stack.user)
 	stacks!: StackingEntity[];
 
+	@OneToMany(() => NotificationReceives, (notiReceive) => notiReceive.user, { nullable: true })
+	notificationReceives!: NotificationReceives[];
+
 	@OneToMany(() => CommandEntity, (command) => command.user)
 	commands!: CommandEntity[];
 
+	@OneToMany(() => FutureCommandEntity, (futureCommand) => futureCommand.user)
+	futureCommands!: FutureCommandEntity[];
+
 	@OneToMany(() => CommandLogEntity, (commandLog) => commandLog.user)
 	commandLogs!: CommandLogEntity[];
+
+	@OneToMany(() => FutureCommandLogEntity, (futureCommandLog) => futureCommandLog.user)
+	futureCommandLogs!: FutureCommandLogEntity[];
 
 	@OneToMany(() => PendingWalletEntity, (pendingWallet) => pendingWallet.user)
 	pendingWallets!: PendingWalletEntity[];
@@ -63,6 +75,9 @@ export class UserEntity extends BaseEntity {
 
 	@Column({ nullable: true, unique: true })
 	inviteCode!: string;
+
+	@Column({ nullable: true, unique: true })
+	fcmToken!: string;
 
 	@Column({ nullable: true })
 	userId!: string;

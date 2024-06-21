@@ -1,8 +1,10 @@
 import { WalletLogType } from '@app/common/enums/walletLog.enum';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
+import { INotification } from '../notification/notification.interface';
+import { Notification_Type } from '../notification/types';
 import { WalletEntity } from './entities/wallet.entity';
 import { IWallet } from './wallet.interface';
 
@@ -14,7 +16,8 @@ export class WalletService extends IWallet {
 		@InjectRepository(WalletEntity)
 		private readonly walletRepo: Repository<WalletEntity>,
 		@InjectRepository(WalletLogEntity)
-		private readonly walletLogRepo: Repository<WalletLogEntity>
+		private readonly walletLogRepo: Repository<WalletLogEntity>,
+		private readonly notificationService: INotification
 	) {
 		super(walletRepo);
 	}
@@ -35,9 +38,26 @@ export class WalletService extends IWallet {
 			});
 		}
 
+		if (currentWallet.quantity < coinQuantity) {
+			throw new BadRequestException('The balance in the wallet is not enough');
+		}
+
+		const DATA_NOTI: Notification_Type = {
+			message: 'Balance fluctuations',
+			entity: 'transaction',
+			entityKind: 'create',
+			notiType: 'announcement'
+		};
+
 		await trx.getRepository(WalletEntity).update(currentWallet.id, {
-			...currentWallet,
 			quantity: +currentWallet.quantity - +coinQuantity
+		});
+
+		await this.notificationService.sendNotification(DATA_NOTI, userId, {
+			body: 'You have had an amount deducted from your wallet',
+			coinName,
+			amount: coinQuantity,
+			remainBalance: +currentWallet.quantity - +coinQuantity
 		});
 
 		await trx.getRepository(WalletLogEntity).save({
@@ -67,8 +87,21 @@ export class WalletService extends IWallet {
 		}
 
 		await trx.getRepository(WalletEntity).update(currentWallet.id, {
-			...currentWallet,
 			quantity: +currentWallet.quantity + +coinQuantity
+		});
+
+		const DATA_NOTI: Notification_Type = {
+			message: 'Balance fluctuations',
+			entity: 'transaction',
+			entityKind: 'create',
+			notiType: 'announcement'
+		};
+
+		await this.notificationService.sendNotification(DATA_NOTI, userId, {
+			body: 'You have received an amount of coins from your wallet',
+			coinName,
+			amount: coinQuantity,
+			remainBalance: +currentWallet.quantity + +coinQuantity
 		});
 
 		await trx.getRepository(WalletLogEntity).save({

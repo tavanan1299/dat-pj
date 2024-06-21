@@ -19,3 +19,13 @@ export enum MarketLogType {
 	COMMAND_SELL = 'command_sell',
 	COMMAND_BUY = 'command_buy'
 }
+
+export enum FutureCommandType {
+	LIMIT = 'limit',
+	MARKET = 'market'
+}
+
+export enum FutureCommandOrderType {
+	LONG = 'long',
+	SHORT = 'short'
+}
