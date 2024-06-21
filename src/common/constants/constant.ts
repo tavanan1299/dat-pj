@@ -31,5 +31,6 @@ export const NotificationType = {
 
 export const NotificationMessage = {
 	BALANCE_FLUCTUATIONS: 'Balance fluctuations',
-	MESSAGE_ADMIN: 'Message from admin'
+	MESSAGE_ADMIN: 'Message from admin',
+	EXECUTED_COMMAND: 'Executed command'
 } as const;

@@ -23,57 +23,20 @@ export class FutureCommandService extends IFutureCommand {
 	async handleFutureCommand(trx: EntityManager, command: FutureCommandEntity, price: number) {
 		const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 			command;
-		if (command.orderType === FutureCommandOrderType.LONG) {
-			if (price > command.entryPrice) {
-				const winAmount = this.calcAmount(
-					price,
-					command.entryPrice,
-					command.quantity,
-					command.leverage,
-					false
-				);
-				await this.walletService.increase(trx, DEFAULT_CURRENCY, winAmount, command.userId);
-			} else {
-				const loseAmount = this.calcAmount(
-					command.entryPrice,
-					price,
-					command.quantity,
-					command.leverage,
-					true
-				);
-				await this.walletService.decrease(
-					trx,
-					DEFAULT_CURRENCY,
-					loseAmount,
-					command.userId
-				);
-			}
-		} else {
-			if (price > command.entryPrice) {
-				const loseAmount = this.calcAmount(
-					price,
-					command.entryPrice,
-					command.quantity,
-					command.leverage,
-					true
-				);
-				await this.walletService.decrease(
-					trx,
-					DEFAULT_CURRENCY,
-					loseAmount,
-					command.userId
-				);
-			} else {
-				const winAmount = this.calcAmount(
-					command.entryPrice,
-					price,
-					command.quantity,
-					command.leverage,
-					false
-				);
-				await this.walletService.increase(trx, DEFAULT_CURRENCY, winAmount, command.userId);
-			}
-		}
+		const profit: number = this.calcProfit(
+			command.entryPrice,
+			price,
+			command.quantity,
+			command.orderType === FutureCommandOrderType.LONG ? true : false
+		);
+
+		await this.walletService.increase(
+			trx,
+			DEFAULT_CURRENCY,
+			command.quantity / command.leverage + profit,
+			command.userId
+		);
+
 		// add logs
 		await trx.getRepository(FutureCommandLogEntity).save({
 			...rest,
@@ -82,17 +45,11 @@ export class FutureCommandService extends IFutureCommand {
 		});
 	}
 
-	calcAmount(
-		bigPrice: number,
-		smallPrice: number,
-		quantity: number,
-		leverage: number,
-		isLose = true
-	) {
-		if (isLose) {
-			return ((bigPrice - smallPrice) / bigPrice) * quantity - quantity / leverage;
+	calcProfit(entryPrice: number, outPrice: number, quantity: number, isLong = true) {
+		if (isLong) {
+			return (1 / entryPrice - 1 / outPrice) * quantity * outPrice;
 		}
 
-		return ((bigPrice - smallPrice) / smallPrice) * quantity + quantity / leverage;
+		return (1 / entryPrice - 1 / outPrice) * (quantity * -1) * outPrice;
 	}
 }

@@ -7,6 +7,7 @@ import { CancelMyFutureCommands } from './commands/cancel-my-future-commands.com
 import { GetAllUserPaginatedCommand } from './commands/get-all-user-paginated.command';
 import { GetMyCommandCommand } from './commands/get-my-command.command';
 import { GetMyFutureCommandCommand } from './commands/get-my-future-command.command';
+import { GetMyFutureHistoriesCommand } from './commands/get-my-future-histories.command';
 import { GetMyMarketHistoriesCommand } from './commands/get-my-market-histories.command';
 import { GetMySpotHistoriesCommand } from './commands/get-my-spot-histories.command';
 import { GetMyStacksCommand } from './commands/get-my-stacks.command';
@@ -61,6 +62,13 @@ export class UserController {
 	@Get('limit-history/me')
 	getMySpotHistories(@Query() query: PaginationDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new GetMySpotHistoriesCommand({ query, user }));
+	}
+
+	@ApiOperation({ description: 'Get my transaction history' })
+	@ApiOkResponse({ description: 'Get my transaction history successfully' })
+	@Get('future-history/me')
+	getMyFutureHistories(@Query() query: PaginationDto, @User() user: UserEntity) {
+		return this.commandBus.execute(new GetMyFutureHistoriesCommand({ query, user }));
 	}
 
 	@ApiOperation({ description: 'Get my stacking' })

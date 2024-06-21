@@ -11,6 +11,8 @@ import { ICommandLog } from '../log/command-log/command-log.interface';
 import { CommandLogService } from '../log/command-log/command-log.service';
 import { CommandLogEntity } from '../log/command-log/entities/command-log.entity';
 import { FutureCommandLogEntity } from '../log/future-command-log/entities/future-command-log.entity';
+import { IFutureCommandLog } from '../log/future-command-log/future-command-log.interface';
+import { FutureCommandLogService } from '../log/future-command-log/future-command-log.service';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
 import { IWalletLog } from '../log/wallet-log/wallet-log.interface';
 import { WalletLogService } from '../log/wallet-log/wallet-log.service';
@@ -39,6 +41,7 @@ import { CreateUserHandler } from './handlers/create-user.handler';
 import { GetAllUserPaginatedHandler } from './handlers/get-all-user-paginated.handler';
 import { GetMyCommandHandler } from './handlers/get-my-command.handler';
 import { GetMyFutureCommandHandler } from './handlers/get-my-future-command.handler';
+import { GetMyFutureHistoriesHandler } from './handlers/get-my-future-histories.handler';
 import { GetMyMarketHistoriesHandler } from './handlers/get-my-market-histories.handler';
 import { GetMySpotHistoriesHandler } from './handlers/get-my-spot-histories.handler';
 import { GetMyStacksHandler } from './handlers/get-my-stacks.handler';
@@ -110,6 +113,10 @@ import { UserService } from './user.service';
 			provide: INotification,
 			useClass: NotificationService
 		},
+		{
+			provide: IFutureCommandLog,
+			useClass: FutureCommandLogService
+		},
 		CreateUserHandler,
 		GetAllUserPaginatedHandler,
 		GetOneUserByIdHandler,
@@ -124,6 +131,7 @@ import { UserService } from './user.service';
 		CancelMyCommandsHandler,
 		GetMyFutureCommandHandler,
 		CancelMyFutureCommandsHandler,
+		GetMyFutureHistoriesHandler,
 		FirebaseService
 	],
 	exports: [IUserService]

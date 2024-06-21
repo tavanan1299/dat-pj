@@ -12,7 +12,8 @@ import { Job } from 'bullmq';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { CommandLogEntity } from '../log/command-log/entities/command-log.entity';
 import { FutureCommandLogEntity } from '../log/future-command-log/entities/future-command-log.entity';
-import { WalletEntity } from '../wallet/entities/wallet.entity';
+import { INotification } from '../notification/notification.interface';
+import { Notification_Type } from '../notification/types';
 import { IWallet } from '../wallet/wallet.interface';
 import { CommandEntity } from './entities/command.entity';
 import { FutureCommandEntity } from './entities/future-command.entity';
@@ -21,11 +22,18 @@ import { IFutureCommand } from './future-command.interface';
 @Processor('binance:coin', { concurrency: 2 })
 export class CommandProcessor extends WorkerHost {
 	private logger = new Logger();
+	private DATA_NOTI: Notification_Type = {
+		message: 'Executed command',
+		entity: 'notification',
+		entityKind: 'create',
+		notiType: 'announcement'
+	};
 
 	constructor(
 		private readonly entityManager: EntityManager,
 		private readonly walletService: IWallet,
-		private readonly futureCommandService: IFutureCommand
+		private readonly futureCommandService: IFutureCommand,
+		private readonly notifService: INotification
 	) {
 		super();
 	}
@@ -104,15 +112,56 @@ export class CommandProcessor extends WorkerHost {
 			);
 		}
 
+		// handle liquidation 80 percent
+		const longLiquidations80 = await this.entityManager
+			.getRepository(FutureCommandEntity)
+			.find({
+				where: {
+					isEntry: true,
+					orderType: FutureCommandOrderType.LONG,
+					coinName: USDT2CoinName(data.s),
+					liquidationPrice80: MoreThanOrEqual(data.p)
+				}
+			});
+
+		const shortLiquidations80 = await this.entityManager
+			.getRepository(FutureCommandEntity)
+			.find({
+				where: {
+					isEntry: true,
+					orderType: FutureCommandOrderType.SHORT,
+					coinName: USDT2CoinName(data.s),
+					liquidationPrice80: LessThanOrEqual(data.p)
+				}
+			});
+
+		for (const futureCommand of [...longLiquidations80, ...shortLiquidations80]) {
+			await this.notifService.sendNotification(this.DATA_NOTI, futureCommand.userId, {
+				body: `Your future order has been reached 80 percent of liquidation`,
+				...futureCommand
+			});
+		}
+
 		// handle liquidation
-		const liquidations = await this.entityManager.getRepository(FutureCommandEntity).find({
+		const longLiquidations = await this.entityManager.getRepository(FutureCommandEntity).find({
 			where: {
 				isEntry: true,
-				coinName: USDT2CoinName(data.s)
+				orderType: FutureCommandOrderType.LONG,
+				coinName: USDT2CoinName(data.s),
+				liquidationPrice: MoreThanOrEqual(data.p)
 			}
 		});
 
-		await this.handleLiquidation(liquidations, data.p);
+		const shortLiquidations = await this.entityManager.getRepository(FutureCommandEntity).find({
+			where: {
+				isEntry: true,
+				orderType: FutureCommandOrderType.SHORT,
+				coinName: USDT2CoinName(data.s),
+				liquidationPrice: LessThanOrEqual(data.p)
+			}
+		});
+
+		await this.handleLiquidation([...longLiquidations, ...shortLiquidations]);
 
 		// handle win
 		const winCommands1 = await this.entityManager.getRepository(FutureCommandEntity).find({
@@ -154,7 +203,7 @@ export class CommandProcessor extends WorkerHost {
 			}
 		});
 
-		await this.handleFutureLose([...loseCommands1, ...loseCommands2], data.p);
+		await this.handleFutureLose([...loseCommands1, ...loseCommands2]);
 
 		return;
 	}
@@ -174,11 +223,16 @@ export class CommandProcessor extends WorkerHost {
 				);
 
 				// add logs
-				await trx.getRepository(CommandLogEntity).save({
+				const commandLog = await trx.getRepository(CommandLogEntity).save({
 					...rest,
 					isLostStop,
 					type: CommandType.SELL,
 					status: CommonStatus.SUCCESS
+				});
+
+				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
+					body: `Your limit order has been reached the ${isLostStop ? 'LS' : 'TP'}`,
+					...commandLog
 				});
 
 				return;
@@ -202,10 +256,15 @@ export class CommandProcessor extends WorkerHost {
 
 				const { id, createdAt, updatedAt, deletedAt, ...rest } = command;
 				// add logs
-				await trx.getRepository(CommandLogEntity).save({
+				const commandLog = await trx.getRepository(CommandLogEntity).save({
 					...rest,
 					type: CommandType.BUY,
 					status: CommonStatus.SUCCESS
+				});
+
+				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
+					body: `Your limit order has been bought`,
+					...commandLog
 				});
 			});
 		}
@@ -213,119 +272,27 @@ export class CommandProcessor extends WorkerHost {
 		return;
 	}
 
-	async handleLiquidation(data: Record<string, any>[], price: number) {
+	async handleLiquidation(data: Record<string, any>[]) {
 		for (const command of data) {
 			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 				command;
-			if (command.orderType === FutureCommandOrderType.LONG && price < command.entryPrice) {
-				await this.entityManager.transaction(async (trx) => {
-					const usdt = await trx
-						.getRepository(WalletEntity)
-						.findOne({ where: { userId: command.userId, coinName: DEFAULT_CURRENCY } });
 
-					const loseAmount = this.futureCommandService.calcAmount(
-						command.entryPrice,
-						price,
-						command.quantity,
-						command.leverage,
-						true
-					);
+			await this.entityManager.transaction(async (trx) => {
+				await trx.getRepository(FutureCommandEntity).delete(command.id);
 
-					if (usdt && loseAmount > usdt.quantity) {
-						// reduce all usdt and delete command
-						await this.walletService.decrease(
-							trx,
-							DEFAULT_CURRENCY,
-							usdt.quantity,
-							command.userId
-						);
-
-						await trx.getRepository(FutureCommandEntity).delete(command.id);
-
-						// add logs
-						await trx.getRepository(FutureCommandLogEntity).save({
-							...rest,
-							status: CommonStatus.SUCCESS,
-							desc: 'Liquidation'
-						});
-						return;
-					}
-
-					if (loseAmount + command.quantity / command.leverage > command.quantity) {
-						await this.walletService.decrease(
-							trx,
-							DEFAULT_CURRENCY,
-							loseAmount,
-							command.userId
-						);
-
-						await trx.getRepository(FutureCommandEntity).delete(command.id);
-
-						// add logs
-						await trx.getRepository(FutureCommandLogEntity).save({
-							...rest,
-							status: CommonStatus.SUCCESS,
-							desc: 'Liquidation'
-						});
-						return;
-					}
+				// add logs
+				const futureCommandLog = await trx.getRepository(FutureCommandLogEntity).save({
+					...rest,
+					status: CommonStatus.SUCCESS,
+					desc: 'Liquidation'
 				});
-			}
 
-			if (command.orderType === FutureCommandOrderType.SHORT && price > command.entryPrice) {
-				await this.entityManager.transaction(async (trx) => {
-					const usdt = await trx
-						.getRepository(WalletEntity)
-						.findOne({ where: { userId: command.userId, coinName: DEFAULT_CURRENCY } });
-
-					const loseAmount = this.futureCommandService.calcAmount(
-						price,
-						command.entryPrice,
-						command.quantity,
-						command.leverage,
-						true
-					);
-
-					if (usdt && loseAmount > usdt.quantity) {
-						// reduce all usdt and delete command
-						await this.walletService.decrease(
-							trx,
-							DEFAULT_CURRENCY,
-							usdt.quantity,
-							command.userId
-						);
-
-						await trx.getRepository(FutureCommandEntity).delete(command.id);
-
-						// add logs
-						await trx.getRepository(FutureCommandLogEntity).save({
-							...rest,
-							status: CommonStatus.SUCCESS,
-							desc: 'Liquidation'
-						});
-						return;
-					}
-
-					if (loseAmount + command.quantity / command.leverage > command.quantity) {
-						await this.walletService.decrease(
-							trx,
-							DEFAULT_CURRENCY,
-							loseAmount,
-							command.userId
-						);
-
-						await trx.getRepository(FutureCommandEntity).delete(command.id);
-
-						// add logs
-						await trx.getRepository(FutureCommandLogEntity).save({
-							...rest,
-							status: CommonStatus.SUCCESS,
-							desc: 'Liquidation'
-						});
-						return;
-					}
+				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
+					body: 'Your future order has been liquidated',
+					...futureCommandLog
 				});
-			}
+				return;
+			});
 		}
 
 		return;
@@ -335,179 +302,77 @@ export class CommandProcessor extends WorkerHost {
 		for (const command of data) {
 			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 				command;
-			if (command.orderType === FutureCommandOrderType.LONG) {
-				const winAmount = this.futureCommandService.calcAmount(
-					command.expectPrice,
-					command.entryPrice,
-					command.quantity,
-					command.leverage,
-					false
+			const profit = this.futureCommandService.calcProfit(
+				command.entryPrice,
+				command.expectPrice,
+				command.quantity,
+				command.orderType === FutureCommandOrderType.LONG ? true : false
+			);
+
+			await this.entityManager.transaction(async (trx) => {
+				await this.walletService.increase(
+					trx,
+					DEFAULT_CURRENCY,
+					command.quantity / command.leverage + profit,
+					command.userId
 				);
 
-				await this.entityManager.transaction(async (trx) => {
-					await this.walletService.increase(
-						trx,
-						DEFAULT_CURRENCY,
-						winAmount,
-						command.userId
-					);
+				await trx.getRepository(FutureCommandEntity).delete(command.id);
 
-					await trx.getRepository(FutureCommandEntity).delete(command.id);
-
-					// add logs
-					await trx.getRepository(FutureCommandLogEntity).save({
-						...rest,
-						status: CommonStatus.SUCCESS,
-						desc: 'Win'
-					});
-
-					return;
+				// add logs
+				const futureCommandLog = await trx.getRepository(FutureCommandLogEntity).save({
+					...rest,
+					status: CommonStatus.SUCCESS,
+					desc: 'Reached TP'
 				});
-			}
 
-			if (command.orderType === FutureCommandOrderType.SHORT) {
-				const winAmount = this.futureCommandService.calcAmount(
-					command.entryPrice,
-					command.expectPrice,
-					command.quantity,
-					command.leverage,
-					false
-				);
-
-				await this.entityManager.transaction(async (trx) => {
-					await this.walletService.increase(
-						trx,
-						DEFAULT_CURRENCY,
-						winAmount,
-						command.userId
-					);
-
-					await trx.getRepository(FutureCommandEntity).delete(command.id);
-
-					// add logs
-					await trx.getRepository(FutureCommandLogEntity).save({
-						...rest,
-						status: CommonStatus.SUCCESS,
-						desc: 'Win'
-					});
-
-					return;
+				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
+					body: 'Your future order has been reached the TP',
+					...futureCommandLog
 				});
-			}
+
+				return;
+			});
 		}
 
 		return;
 	}
 
-	async handleFutureLose(data: Record<string, any>[], price: number) {
+	async handleFutureLose(data: Record<string, any>[]) {
 		for (const command of data) {
 			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 				command;
+			const profit = this.futureCommandService.calcProfit(
+				command.entryPrice,
+				command.lossStopPrice,
+				command.quantity,
+				command.orderType === FutureCommandOrderType.LONG ? true : false
+			);
 
-			if (command.orderType === FutureCommandOrderType.LONG) {
-				await this.entityManager.transaction(async (trx) => {
-					const usdt = await trx
-						.getRepository(WalletEntity)
-						.findOne({ where: { userId: command.userId, coinName: DEFAULT_CURRENCY } });
+			await this.entityManager.transaction(async (trx) => {
+				await this.walletService.increase(
+					trx,
+					DEFAULT_CURRENCY,
+					command.quantity / command.leverage + profit,
+					command.userId
+				);
 
-					const loseAmount = this.futureCommandService.calcAmount(
-						command.entryPrice,
-						command.lossStopPrice,
-						command.quantity,
-						command.leverage,
-						true
-					);
+				await trx.getRepository(FutureCommandEntity).delete(command.id);
 
-					if (usdt && loseAmount > usdt.quantity) {
-						// reduce all usdt and delete command
-						await this.walletService.decrease(
-							trx,
-							DEFAULT_CURRENCY,
-							usdt.quantity,
-							command.userId
-						);
-
-						await trx.getRepository(FutureCommandEntity).delete(command.id);
-						// add logs
-						await trx.getRepository(FutureCommandLogEntity).save({
-							...rest,
-							status: CommonStatus.SUCCESS,
-							desc: 'Liquidation'
-						});
-						return;
-					}
-
-					await this.walletService.decrease(
-						trx,
-						DEFAULT_CURRENCY,
-						loseAmount,
-						command.userId
-					);
-
-					await trx.getRepository(FutureCommandEntity).delete(command.id);
-
-					// add logs
-					await trx.getRepository(FutureCommandLogEntity).save({
-						...rest,
-						status: CommonStatus.SUCCESS,
-						desc: 'Lose'
-					});
-					return;
+				// add logs
+				const futureCommandLog = await trx.getRepository(FutureCommandLogEntity).save({
+					...rest,
+					status: CommonStatus.SUCCESS,
+					desc: 'Reached LS'
 				});
-			}
 
-			if (command.orderType === FutureCommandOrderType.SHORT) {
-				await this.entityManager.transaction(async (trx) => {
-					const usdt = await trx
-						.getRepository(WalletEntity)
-						.findOne({ where: { userId: command.userId, coinName: DEFAULT_CURRENCY } });
-
-					const loseAmount = this.futureCommandService.calcAmount(
-						command.lossStopPrice,
-						command.entryPrice,
-						command.quantity,
-						command.leverage,
-						true
-					);
-
-					if (usdt && loseAmount > usdt.quantity) {
-						// reduce all usdt and delete command
-						await this.walletService.decrease(
-							trx,
-							DEFAULT_CURRENCY,
-							usdt.quantity,
-							command.userId
-						);
-
-						await trx.getRepository(FutureCommandEntity).delete(command.id);
-
-						// add logs
-						await trx.getRepository(FutureCommandLogEntity).save({
-							...rest,
-							status: CommonStatus.SUCCESS,
-							desc: 'Liquidation'
-						});
-						return;
-					}
-
-					await this.walletService.decrease(
-						trx,
-						DEFAULT_CURRENCY,
-						loseAmount,
-						command.userId
-					);
-
-					await trx.getRepository(FutureCommandEntity).delete(command.id);
-
-					// add logs
-					await trx.getRepository(FutureCommandLogEntity).save({
-						...rest,
-						status: CommonStatus.SUCCESS,
-						desc: 'Lose'
-					});
-					return;
+				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
+					body: 'Your future order has been reached the LS',
+					...futureCommandLog
 				});
-			}
+
+				return;
+			});
 		}
 
 		return;

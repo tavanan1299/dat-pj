@@ -35,6 +35,12 @@ export class FutureCommandEntity extends BaseEntity {
 	@Column({ type: 'float' })
 	leverage!: number;
 
+	@Column({ type: 'float' })
+	liquidationPrice80!: number;
+
+	@Column({ type: 'float' })
+	liquidationPrice!: number;
+
 	@Column({ nullable: true })
 	userId!: string;
 

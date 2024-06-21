@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { NotificationModule } from '../notification/notification.module';
 import { WalletModule } from '../wallet/wallet.module';
 import { CommandController } from './command.controller';
 import { ICommand } from './command.interface';
@@ -16,7 +17,11 @@ import { CreateFutureCommandHandler } from './handlers/create-future-command.han
 import { UpdateFutureCommandHandler } from './handlers/update-future-command.handler';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([CommandEntity, FutureCommandEntity]), WalletModule],
+	imports: [
+		TypeOrmModule.forFeature([CommandEntity, FutureCommandEntity]),
+		WalletModule,
+		NotificationModule
+	],
 	controllers: [CommandController],
 	providers: [
 		{

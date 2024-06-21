@@ -19,7 +19,7 @@ export class PaginationDto<T = BaseEntity> {
 	page?: number;
 
 	@IsOptional()
-	@Transform(({ value }) => JSON.parse(value || '{}'))
+	@Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value))
 	@ApiProperty({
 		description: 'Sort by field',
 		example: '{ "createdAt": "ASC" }',
