@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { google } from 'googleapis';
-import * as key from './firebase-sdk.json';
+import * as key from '../../../firebase-sdk.json';
 
 export type Notification = {
 	title: string;
