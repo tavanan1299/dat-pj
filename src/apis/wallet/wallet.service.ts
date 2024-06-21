@@ -1,5 +1,5 @@
 import { WalletLogType } from '@app/common/enums/walletLog.enum';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
@@ -36,6 +36,10 @@ export class WalletService extends IWallet {
 				coinName,
 				quantity: 0
 			});
+		}
+
+		if (currentWallet.quantity < coinQuantity) {
+			throw new BadRequestException('The balance in the wallet is not enough');
 		}
 
 		const DATA_NOTI: Notification_Type = {

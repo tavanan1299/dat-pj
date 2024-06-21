@@ -41,7 +41,7 @@ import { FirebaseModule } from './modules/firebase/firebase.module';
 export class AppModule implements NestModule {
 	constructor() {
 		firebase.initializeApp({
-			credential: firebase.credential.cert('src/modules/firebase/firebase-sdk.json')
+			credential: firebase.credential.cert('dist/firebase-sdk.json')
 		});
 	}
 

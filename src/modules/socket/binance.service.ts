@@ -1,4 +1,5 @@
 import { CommandEntity } from '@app/apis/command/entities/command.entity';
+import { FutureCommandEntity } from '@app/apis/command/entities/future-command.entity';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -38,15 +39,24 @@ export class BinanceService {
 	}
 
 	async getCurrentListenCoin() {
-		const data = await this.entityManager
+		const limit = this.entityManager
 			.getRepository(CommandEntity)
 			.createQueryBuilder('command')
-			.select('command.coinName')
-			.distinctOn(['command.coinName'])
-			.getMany();
+			.select('command.coinName', 'symbol')
+			.getQuery();
+
+		const future = this.entityManager
+			.getRepository(FutureCommandEntity)
+			.createQueryBuilder('future')
+			.select('future.coinName', 'symbol')
+			.getQuery();
+
+		const data = await this.entityManager.query(
+			`SELECT distinct(symbol) as name FROM (${limit} UNION ${future})`
+		);
 
 		this.coins = data.length
-			? data.map((item) => `${item.coinName}usdt@markPrice`)
+			? data.map((item) => `${item.name}usdt@markPrice`)
 			: ['btcusdt@markPrice'];
 		return;
 	}
