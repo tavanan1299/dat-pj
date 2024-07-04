@@ -44,7 +44,7 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 				const newWallet = WalletEntity.create({
 					userId: currentUser.id,
 					coinName: data.coinName,
-					quantity: data.quantity
+					quantity: 0
 				});
 				currentWallet = await WalletEntity.save(newWallet);
 			}
