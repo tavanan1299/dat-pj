@@ -15,9 +15,9 @@ export class BinanceGateway implements OnGatewayInit, OnGatewayConnection, OnGat
 	constructor(private readonly binanceService: BinanceService) {}
 
 	async afterInit() {
-		await this.binanceService.getCurrentListenCoin();
-		console.log('WebSocket Gateway Initialized');
-		this.binanceService.initWebSocket();
+		// await this.binanceService.getCurrentListenCoin();
+		// console.log('WebSocket Gateway Initialized');
+		// this.binanceService.initWebSocket();
 	}
 
 	handleConnection(client: Socket, ...args: any[]) {
