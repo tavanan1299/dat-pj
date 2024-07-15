@@ -12,7 +12,7 @@ export const INTEREST_RATE = {
 
 export const DEFAULT_CURRENCY = 'usdt';
 
-export const BINANCE_API = 'https://api.binance.com/api/v3/ticker/price?symbol=';
+export const BINANCE_API = 'https://api.binance.us/api/v3/ticker/price?symbol=';
 
 export const NotificationEntity = {
 	TRANSACTION: 'transaction',
