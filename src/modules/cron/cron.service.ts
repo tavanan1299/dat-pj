@@ -1,4 +1,6 @@
 import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.entity';
+import { INotification } from '@app/apis/notification/notification.interface';
+import { Notification_Type } from '@app/apis/notification/types';
 import { StackingEntity } from '@app/apis/stacking/entities/stacking.entity';
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
 import { INTEREST_RATE } from '@app/common/constants/constant';
@@ -12,6 +14,10 @@ import { ICronService } from './cron.interface';
 @Injectable()
 export class CronService extends ICronService {
 	private readonly logger = new Logger(CronService.name);
+
+	constructor(private readonly notifService: INotification) {
+		super();
+	}
 
 	@Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
 	async handleStacking() {
@@ -40,7 +46,7 @@ export class CronService extends ICronService {
 					wallet.quantity += profit;
 					await WalletEntity.update(wallet.id, { quantity: wallet.quantity });
 
-					await WalletLogEntity.save(
+					const walletLog = await WalletLogEntity.save(
 						WalletLogEntity.create({
 							userId: wallet.userId,
 							walletId: wallet.id,
@@ -50,6 +56,18 @@ export class CronService extends ICronService {
 							type: WalletLogType.STACKING
 						})
 					);
+
+					const DATA_NOTI: Notification_Type = {
+						message: 'Stacking done',
+						entity: 'notification',
+						entityKind: 'create',
+						notiType: 'announcement'
+					};
+
+					await this.notifService.sendNotification(DATA_NOTI, wallet.userId, {
+						body: 'Stacking is done',
+						...walletLog
+					});
 
 					stacking.status = StackingStatus.DONE;
 					await StackingEntity.update(stacking.id, { status: stacking.status });
