@@ -46,6 +46,7 @@ import { GetMyMarketHistoriesHandler } from './handlers/get-my-market-histories.
 import { GetMySpotHistoriesHandler } from './handlers/get-my-spot-histories.handler';
 import { GetMyStacksHandler } from './handlers/get-my-stacks.handler';
 import { GetMyTransHistoriesHandler } from './handlers/get-my-trans-histories.handler';
+import { GetMyWalletHandler } from './handlers/get-my-wallet.handler';
 import { GetOneUserByIdHandler } from './handlers/get-one-user-by-id.handler';
 import { RemoveUserByIdHandler } from './handlers/remove-user-by-id.handler';
 import { UpdateUserByIdHandler } from './handlers/update-user-by-id.handler';
@@ -132,6 +133,7 @@ import { UserService } from './user.service';
 		GetMyFutureCommandHandler,
 		CancelMyFutureCommandsHandler,
 		GetMyFutureHistoriesHandler,
+		GetMyWalletHandler,
 		FirebaseService
 	],
 	exports: [IUserService]

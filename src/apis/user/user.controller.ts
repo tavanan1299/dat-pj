@@ -12,6 +12,7 @@ import { GetMyMarketHistoriesCommand } from './commands/get-my-market-histories.
 import { GetMySpotHistoriesCommand } from './commands/get-my-spot-histories.command';
 import { GetMyStacksCommand } from './commands/get-my-stacks.command';
 import { GetMyTransHistoriesCommand } from './commands/get-my-trans-histories.command';
+import { GetMyWalletCommand } from './commands/get-my-wallet.command';
 import { GetOneUserByIdCommand } from './commands/get-one-user-by-id.command';
 import { UpsertProfileCommand } from './commands/upsert-profile.command';
 import { UpsertProfileDto } from './dto/upsert-profile.dto';
@@ -118,6 +119,13 @@ export class UserController {
 	@Delete('command/future/me')
 	deleteMyFutureCommands(@User() user: UserEntity) {
 		return this.commandBus.execute(new CancelMyFutureCommands({ userId: user.id }));
+	}
+
+	@ApiOperation({ description: 'Get my wallet' })
+	@ApiOkResponse({ description: 'Get my wallet successfully' })
+	@Get('wallet/me')
+	getMyWallet(@Query() query: PaginationDto, @User() user: UserEntity) {
+		return this.commandBus.execute(new GetMyWalletCommand({ query, user }));
 	}
 
 	// @Patch(':id')
