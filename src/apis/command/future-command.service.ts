@@ -30,18 +30,19 @@ export class FutureCommandService extends IFutureCommand {
 			command.orderType === FutureCommandOrderType.LONG ? true : false
 		);
 
-		await this.walletService.increase(
-			trx,
-			DEFAULT_CURRENCY,
-			command.quantity / command.leverage + profit,
-			command.userId
-		);
+		const PNLClosed = command.quantity / command.leverage + profit;
+
+		await this.walletService.increase(trx, DEFAULT_CURRENCY, PNLClosed, command.userId);
 
 		// add logs
 		await trx.getRepository(FutureCommandLogEntity).save({
 			...rest,
 			status: CommonStatus.SUCCESS,
-			desc: 'Cancel'
+			desc: 'Cancel',
+			PNLClosed,
+			closedVolume: command.entryPrice * command.leverage,
+			closingPrice: price,
+			closedAt: new Date()
 		});
 	}
 

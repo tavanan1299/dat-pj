@@ -51,22 +51,22 @@ export class UserController {
 		return this.commandBus.execute(new GetMyTransHistoriesCommand({ query, user }));
 	}
 
-	@ApiOperation({ description: 'Get my transaction history' })
-	@ApiOkResponse({ description: 'Get my transaction history successfully' })
+	@ApiOperation({ description: 'Get my market history' })
+	@ApiOkResponse({ description: 'Get my market history successfully' })
 	@Get('market-history/me')
 	getMyMarketHistories(@Query() query: PaginationDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new GetMyMarketHistoriesCommand({ query, user }));
 	}
 
-	@ApiOperation({ description: 'Get my transaction history' })
-	@ApiOkResponse({ description: 'Get my transaction history successfully' })
+	@ApiOperation({ description: 'Get my limit history' })
+	@ApiOkResponse({ description: 'Get my limit history successfully' })
 	@Get('limit-history/me')
 	getMySpotHistories(@Query() query: PaginationDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new GetMySpotHistoriesCommand({ query, user }));
 	}
 
-	@ApiOperation({ description: 'Get my transaction history' })
-	@ApiOkResponse({ description: 'Get my transaction history successfully' })
+	@ApiOperation({ description: 'Get my future history' })
+	@ApiOkResponse({ description: 'Get my future history successfully' })
 	@Get('future-history/me')
 	getMyFutureHistories(@Query() query: PaginationDto, @User() user: UserEntity) {
 		return this.commandBus.execute(new GetMyFutureHistoriesCommand({ query, user }));

@@ -13,7 +13,7 @@ export class GetOneNotificationByIdHandler
 		this.logger.log(command);
 		const { id, user } = command;
 
-		const notifcation = await NotificationReceives.findOne({
+		const notification = await NotificationReceives.findOne({
 			where: {
 				userId: user.id,
 				id
@@ -21,8 +21,10 @@ export class GetOneNotificationByIdHandler
 			relations: ['notification']
 		});
 
-		if (!notifcation) throw new NotFoundException('Notification does not exist');
+		if (!notification) throw new NotFoundException('Notification does not exist');
 
-		return notifcation;
+		await NotificationReceives.update(notification?.id, { isRead: true });
+
+		return notification;
 	}
 }
