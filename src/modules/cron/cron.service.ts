@@ -37,8 +37,7 @@ export class CronService extends ICronService {
 		const rate = await RateEntity.find();
 		const INTEREST_RATE = rate[0].rate;
 
-		const date = new Date();
-		const currentDate = new Date(date.setMonth(date.getMonth() + 1));
+		const currentDate = new Date();
 
 		for (const stacking of stackings) {
 			const createdAt = new Date(stacking.createdAt);
