@@ -2,7 +2,7 @@ import { BaseEntity } from '@common';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsOptional } from 'class-validator';
-import { FindOptionsOrder } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere } from 'typeorm';
 import { IsNumber } from '../decorators/validation.decorator';
 
 export class PaginationDto<T = BaseEntity> {
@@ -27,14 +27,14 @@ export class PaginationDto<T = BaseEntity> {
 	})
 	order?: FindOptionsOrder<T>;
 
-	// @IsOptional()
-	// @Transform(({ value }) => JSON.parse(value || '{}'))
-	// @ApiProperty({
-	// 	description: 'Filter by field',
-	// 	example: '{ "name": "string" }',
-	// 	type: 'string'
-	// })
-	// filter?: FindOptionsWhere<T> | FindOptionsWhere<T>[];
+	@IsOptional()
+	@Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value))
+	@ApiProperty({
+		description: 'Filter by field',
+		example: '{ "name": "string" }',
+		type: 'string'
+	})
+	filter?: FindOptionsWhere<T> | FindOptionsWhere<T>[];
 
 	// @IsOptional()
 	// @ApiProperty({ description: 'Search...', example: '' })

@@ -12,7 +12,7 @@ export function random(length: number) {
 
 export function randomOTP(length: number) {
 	let result = '';
-	const characters = '0123456789';
+	const characters = '123456789';
 	const charactersLength = characters.length;
 	let counter = 0;
 	while (counter < length) {
