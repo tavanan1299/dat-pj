@@ -89,13 +89,13 @@ export abstract class BaseService<T extends BaseEntity> extends AbstractBaseServ
 		const { 
 			limit = 10, 
 			page = 1, 
-			where = { ...options.where, ...options.filter }, 
 			select, 
 			withDeleted, 
 			loadEagerRelations, 
 			order, 
 			relations 
 		} = options;
+		const where = {...options.where, ...options.filter}
 		const take = limit === -1 ? undefined : limit;
 		const skip = limit === -1 ? undefined : limit * (+page - 1);
 
