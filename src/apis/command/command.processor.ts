@@ -161,7 +161,7 @@ export class CommandProcessor extends WorkerHost {
 			}
 		});
 
-		await this.handleLiquidation([...longLiquidations, ...shortLiquidations]);
+		await this.handleLiquidation([...longLiquidations, ...shortLiquidations], data.p);
 
 		// handle win
 		const winCommands1 = await this.entityManager.getRepository(FutureCommandEntity).find({
@@ -182,7 +182,7 @@ export class CommandProcessor extends WorkerHost {
 			}
 		});
 
-		await this.handleFutureWin([...winCommands1, ...winCommands2]);
+		await this.handleFutureWin([...winCommands1, ...winCommands2], data.p);
 
 		// handle lose
 		const loseCommands1 = await this.entityManager.getRepository(FutureCommandEntity).find({
@@ -203,7 +203,7 @@ export class CommandProcessor extends WorkerHost {
 			}
 		});
 
-		await this.handleFutureLose([...loseCommands1, ...loseCommands2]);
+		await this.handleFutureLose([...loseCommands1, ...loseCommands2], data.p);
 
 		return;
 	}
@@ -272,7 +272,7 @@ export class CommandProcessor extends WorkerHost {
 		return;
 	}
 
-	async handleLiquidation(data: Record<string, any>[]) {
+	async handleLiquidation(data: Record<string, any>[], price: string) {
 		for (const command of data) {
 			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 				command;
@@ -284,7 +284,11 @@ export class CommandProcessor extends WorkerHost {
 				const futureCommandLog = await trx.getRepository(FutureCommandLogEntity).save({
 					...rest,
 					status: CommonStatus.SUCCESS,
-					desc: 'Liquidation'
+					desc: 'Liquidation',
+					PNLClosed: 0,
+					closedVolume: command.entryPrice * command.leverage,
+					closingPrice: +price,
+					closedAt: new Date()
 				});
 
 				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
@@ -298,7 +302,7 @@ export class CommandProcessor extends WorkerHost {
 		return;
 	}
 
-	async handleFutureWin(data: Record<string, any>[]) {
+	async handleFutureWin(data: Record<string, any>[], price: string) {
 		for (const command of data) {
 			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 				command;
@@ -310,12 +314,8 @@ export class CommandProcessor extends WorkerHost {
 			);
 
 			await this.entityManager.transaction(async (trx) => {
-				await this.walletService.increase(
-					trx,
-					DEFAULT_CURRENCY,
-					command.quantity / command.leverage + profit,
-					command.userId
-				);
+				const PNLClosed = command.quantity / command.leverage + profit;
+				await this.walletService.increase(trx, DEFAULT_CURRENCY, PNLClosed, command.userId);
 
 				await trx.getRepository(FutureCommandEntity).delete(command.id);
 
@@ -323,7 +323,11 @@ export class CommandProcessor extends WorkerHost {
 				const futureCommandLog = await trx.getRepository(FutureCommandLogEntity).save({
 					...rest,
 					status: CommonStatus.SUCCESS,
-					desc: 'Reached TP'
+					desc: 'Reached TP',
+					PNLClosed,
+					closedVolume: command.entryPrice * command.leverage,
+					closingPrice: +price,
+					closedAt: new Date()
 				});
 
 				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
@@ -338,7 +342,7 @@ export class CommandProcessor extends WorkerHost {
 		return;
 	}
 
-	async handleFutureLose(data: Record<string, any>[]) {
+	async handleFutureLose(data: Record<string, any>[], price: string) {
 		for (const command of data) {
 			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 				command;
@@ -350,12 +354,8 @@ export class CommandProcessor extends WorkerHost {
 			);
 
 			await this.entityManager.transaction(async (trx) => {
-				await this.walletService.increase(
-					trx,
-					DEFAULT_CURRENCY,
-					command.quantity / command.leverage + profit,
-					command.userId
-				);
+				const PNLClosed = command.quantity / command.leverage + profit;
+				await this.walletService.increase(trx, DEFAULT_CURRENCY, PNLClosed, command.userId);
 
 				await trx.getRepository(FutureCommandEntity).delete(command.id);
 
@@ -363,7 +363,11 @@ export class CommandProcessor extends WorkerHost {
 				const futureCommandLog = await trx.getRepository(FutureCommandLogEntity).save({
 					...rest,
 					status: CommonStatus.SUCCESS,
-					desc: 'Reached LS'
+					desc: 'Reached LS',
+					PNLClosed,
+					closedVolume: command.entryPrice * command.leverage,
+					closingPrice: +price,
+					closedAt: new Date()
 				});
 
 				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {

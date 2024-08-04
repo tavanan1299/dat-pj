@@ -33,6 +33,18 @@ export class FutureCommandLogEntity extends BaseEntity {
 	@Column({ type: 'float' })
 	leverage!: number;
 
+	@Column({ type: 'float', nullable: true })
+	PNLClosed!: number;
+
+	@Column({ type: 'float', nullable: true })
+	closedVolume!: number;
+
+	@Column({ type: 'float', nullable: true })
+	closingPrice!: number;
+
+	@Column({ type: 'date', nullable: true })
+	closedAt?: Date | null;
+
 	@Column({ nullable: true })
 	userId!: string;
 

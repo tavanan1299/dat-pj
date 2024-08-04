@@ -14,9 +14,7 @@ export class GetMyWalletHandler implements ICommandHandler<GetMyWalletCommand> {
 		this.logger.log(command);
 		const { query, user } = command;
 		const queryParams: any = { ...query };
-
 		queryParams.where = { userId: user.id };
-
 		return this.walletService.getAllPaginated(queryParams);
 	}
 }

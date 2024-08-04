@@ -14,17 +14,17 @@ export class BaseEntity extends TypeormBaseEntity {
 	id!: string;
 
 	/** Ngày tạo */
-	@ApiProperty({ description: 'Ngày tạo' })
+	@ApiProperty({ description: 'Created at' })
 	@CreateDateColumn()
 	createdAt!: Date;
 
 	/** Lần cuối update */
-	@ApiProperty({ description: 'Lần cuối update' })
+	@ApiProperty({ description: 'Updated at' })
 	@UpdateDateColumn()
 	updatedAt!: Date;
 
 	/** Ngày xoá */
-	@ApiProperty({ description: 'Ngày xoá' })
+	@ApiProperty({ description: 'Deleted at' })
 	@DeleteDateColumn()
 	deletedAt?: Date | null;
 }

@@ -1,21 +1,27 @@
 import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.entity';
 import { INotification } from '@app/apis/notification/notification.interface';
 import { Notification_Type } from '@app/apis/notification/types';
+import { RateEntity } from '@app/apis/stacking/entities/rate.entity';
 import { StackingEntity } from '@app/apis/stacking/entities/stacking.entity';
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
-import { INTEREST_RATE } from '@app/common/constants/constant';
+import { IWallet } from '@app/apis/wallet/wallet.interface';
 import { StackingStatus } from '@app/common/enums/status.enum';
 import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { differenceInCalendarMonths } from 'date-fns';
+import { EntityManager } from 'typeorm';
 import { ICronService } from './cron.interface';
 
 @Injectable()
 export class CronService extends ICronService {
 	private readonly logger = new Logger(CronService.name);
 
-	constructor(private readonly notifService: INotification) {
+	constructor(
+		private readonly notifService: INotification,
+		private readonly walletService: IWallet,
+		private readonly entityManager: EntityManager
+	) {
 		super();
 	}
 
@@ -28,6 +34,9 @@ export class CronService extends ICronService {
 				status: StackingStatus.PENDING
 			}
 		});
+		const rate = await RateEntity.find();
+		const INTEREST_RATE = rate[0].rate;
+
 		const currentDate = new Date();
 
 		for (const stacking of stackings) {
@@ -41,10 +50,15 @@ export class CronService extends ICronService {
 					}
 				});
 				if (wallet) {
-					const rate = INTEREST_RATE[wallet.quantity] || 0;
-					const profit = (wallet.quantity * rate) / 100;
-					wallet.quantity += profit;
-					await WalletEntity.update(wallet.id, { quantity: wallet.quantity });
+					const rate = (INTEREST_RATE[stacking.monthSaving] as number) || 0;
+					const profit = (stacking.quantity * rate) / 100 + stacking.quantity;
+
+					await this.walletService.increase(
+						this.entityManager,
+						stacking.coinName,
+						profit,
+						stacking.userId
+					);
 
 					const walletLog = await WalletLogEntity.save(
 						WalletLogEntity.create({
