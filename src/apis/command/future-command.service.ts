@@ -32,7 +32,16 @@ export class FutureCommandService extends IFutureCommand {
 
 		const PNLClosed = command.quantity / command.leverage + profit;
 
-		await this.walletService.increase(trx, DEFAULT_CURRENCY, PNLClosed, command.userId);
+		if (PNLClosed < 0) {
+			await this.walletService.decrease(
+				trx,
+				DEFAULT_CURRENCY,
+				Math.abs(PNLClosed),
+				command.userId
+			);
+		} else {
+			await this.walletService.increase(trx, DEFAULT_CURRENCY, PNLClosed, command.userId);
+		}
 
 		// add logs
 		await trx.getRepository(FutureCommandLogEntity).save({
