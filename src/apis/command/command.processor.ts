@@ -276,8 +276,30 @@ export class CommandProcessor extends WorkerHost {
 		for (const command of data) {
 			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 				command;
+			const profit = this.futureCommandService.calcProfit(
+				command.entryPrice,
+				command.liquidationPrice,
+				command.quantity,
+				command.orderType === FutureCommandOrderType.LONG ? true : false
+			);
 
 			await this.entityManager.transaction(async (trx) => {
+				const PNLClosed = command.quantity / command.leverage + profit;
+				if (PNLClosed < 0) {
+					await this.walletService.decrease(
+						trx,
+						DEFAULT_CURRENCY,
+						Math.abs(PNLClosed),
+						command.userId
+					);
+				} else {
+					await this.walletService.increase(
+						trx,
+						DEFAULT_CURRENCY,
+						PNLClosed,
+						command.userId
+					);
+				}
 				await trx.getRepository(FutureCommandEntity).delete(command.id);
 
 				// add logs
@@ -355,7 +377,21 @@ export class CommandProcessor extends WorkerHost {
 
 			await this.entityManager.transaction(async (trx) => {
 				const PNLClosed = command.quantity / command.leverage + profit;
-				await this.walletService.increase(trx, DEFAULT_CURRENCY, PNLClosed, command.userId);
+				if (PNLClosed < 0) {
+					await this.walletService.decrease(
+						trx,
+						DEFAULT_CURRENCY,
+						Math.abs(PNLClosed),
+						command.userId
+					);
+				} else {
+					await this.walletService.increase(
+						trx,
+						DEFAULT_CURRENCY,
+						PNLClosed,
+						command.userId
+					);
+				}
 
 				await trx.getRepository(FutureCommandEntity).delete(command.id);
 
