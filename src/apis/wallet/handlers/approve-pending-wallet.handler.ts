@@ -92,7 +92,8 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 				coinName: pendingWallet.coinName,
 				quantity: pendingWallet.quantity,
 				remainBalance: wallet?.quantity - pendingWallet.quantity,
-				type: HistoryWalletType.WITHDRAW
+				type: HistoryWalletType.WITHDRAW,
+				desc: 'increase'
 			});
 		});
 
@@ -130,7 +131,8 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 				coinName: pendingWallet.coinName,
 				quantity: pendingWallet.quantity,
 				remainBalance: wallet?.quantity + pendingWallet.quantity,
-				type: HistoryWalletType.DEPOSIT
+				type: HistoryWalletType.DEPOSIT,
+				desc: 'decrease'
 			});
 		});
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { WalletLogEntity } from '../log/wallet-log/entities/wallet-log.entity';
@@ -43,10 +43,6 @@ export class WalletService extends IWallet {
 			});
 		}
 
-		if (currentWallet.quantity < coinQuantity) {
-			throw new BadRequestException('The balance in the wallet is not enough');
-		}
-
 		const DATA_NOTI: Notification_Type = {
 			message: 'Balance fluctuations',
 			entity: 'transaction',
@@ -54,15 +50,23 @@ export class WalletService extends IWallet {
 			notiType: 'announcement'
 		};
 
+		let remainBalance = +currentWallet.quantity - +coinQuantity;
+		let desc = 'decrease';
+
+		if (currentWallet.quantity < coinQuantity) {
+			remainBalance = 0;
+			desc = 'liquidation';
+		}
+
 		await trx.getRepository(WalletEntity).update(currentWallet.id, {
-			quantity: +currentWallet.quantity - +coinQuantity
+			quantity: remainBalance
 		});
 
 		await this.notificationService.sendNotification(DATA_NOTI, userId, {
 			body: 'You have had an amount deducted from your wallet',
 			coinName,
 			amount: coinQuantity,
-			remainBalance: +currentWallet.quantity - +coinQuantity
+			remainBalance
 		});
 
 		await trx.getRepository(WalletLogEntity).save({
@@ -70,8 +74,9 @@ export class WalletService extends IWallet {
 			walletId: currentWallet.id,
 			coinName: currentWallet.coinName,
 			quantity: coinQuantity,
-			remainBalance: +currentWallet.quantity - +coinQuantity,
-			type: logType
+			remainBalance,
+			type: logType,
+			desc
 		});
 	}
 
@@ -121,7 +126,8 @@ export class WalletService extends IWallet {
 			coinName: currentWallet.coinName,
 			quantity: coinQuantity,
 			remainBalance: +currentWallet.quantity + +coinQuantity,
-			type: logType
+			type: logType,
+			desc: 'increase'
 		});
 	}
 }

@@ -1,6 +1,7 @@
 import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
 import { BaseEntity } from '@app/common';
+import { CommonStatus } from '@app/common/enums/status.enum';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity({ name: 'walletLog' })
@@ -30,4 +31,10 @@ export class WalletLogEntity extends BaseEntity {
 	@ManyToOne(() => WalletEntity, (wallet) => wallet.walletLogs)
 	@JoinColumn({ name: 'walletId', referencedColumnName: 'id' })
 	wallet!: WalletEntity;
+
+	@Column({ type: 'enum', enum: CommonStatus, default: CommonStatus.SUCCESS })
+	status!: CommonStatus;
+
+	@Column({ nullable: true })
+	desc!: string;
 }
