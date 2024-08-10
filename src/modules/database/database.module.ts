@@ -10,7 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 				type: 'postgres',
 				timezone: 'UTC',
 				host: configService.get<string>('DB_HOST'),
-				port: configService.get<number>('DB_HOST_PORT'),
+				port: configService.get<number>('DB_PORT'),
 				username: configService.get<string>('DB_USERNAME'),
 				password: configService.get<string>('DB_PASSWORD'),
 				database: configService.get<string>('DB_NAME'),
@@ -19,13 +19,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 				migrationsTableName: `migrations`,
 				migrations: [__dirname + '/migrations/*{.ts,.js}'],
 				migrationsRun: false,
-				synchronize: false
-				// ssl: true,
-				// extra: {
-				// 	ssl: {
-				// 		rejectUnauthorized: false
-				// 	}
-				// }
+				synchronize: false,
+				ssl: true,
+				extra: {
+					ssl: {
+						rejectUnauthorized: false
+					}
+				}
 			})
 		})
 	]

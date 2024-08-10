@@ -1,5 +1,5 @@
 import { ApiController, PaginationDto, UseUserGuard, User } from '@common';
-import { Body, Controller, Delete, Get, Param, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { CancelMyCommands } from './commands/cancel-my-commands.command';
@@ -102,7 +102,7 @@ export class UserController {
 
 	@ApiOperation({ description: 'Cancel my limit commands' })
 	@ApiOkResponse({ description: 'Cancel my limit commands successfully' })
-	@Delete('command/limit/me')
+	@Post('command/limit/me/cancel')
 	deleteMyCommands(@User() user: UserEntity) {
 		return this.commandBus.execute(new CancelMyCommands({ userId: user.id }));
 	}
@@ -116,7 +116,7 @@ export class UserController {
 
 	@ApiOperation({ description: 'Cancel my limit commands' })
 	@ApiOkResponse({ description: 'Cancel my limit commands successfully' })
-	@Delete('command/future/me')
+	@Post('command/future/me/closed')
 	deleteMyFutureCommands(@User() user: UserEntity) {
 		return this.commandBus.execute(new CancelMyFutureCommands({ userId: user.id }));
 	}
