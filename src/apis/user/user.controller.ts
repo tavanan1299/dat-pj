@@ -116,7 +116,7 @@ export class UserController {
 
 	@ApiOperation({ description: 'Cancel my limit commands' })
 	@ApiOkResponse({ description: 'Cancel my limit commands successfully' })
-	@Post('command/future/me/closed')
+	@Post('command/future/me/close')
 	deleteMyFutureCommands(@User() user: UserEntity) {
 		return this.commandBus.execute(new CancelMyFutureCommands({ userId: user.id }));
 	}
