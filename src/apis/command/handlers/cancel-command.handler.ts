@@ -1,6 +1,6 @@
 import { CommandLogEntity } from '@app/apis/log/command-log/entities/command-log.entity';
 import { IWallet } from '@app/apis/wallet/wallet.interface';
-import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
+import { DEFAULT_CURRENCY, HistoryWalletType } from '@app/common/constants/constant';
 import { ROLES } from '@app/common/constants/role.constant';
 import { CommandType, CommonStatus } from '@app/common/enums/status.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
@@ -41,14 +41,16 @@ export class CancelCommandHandler implements ICommandHandler<CancelCommand> {
 							trx,
 							currentCommand.coinName,
 							currentCommand.quantity,
-							user.id
+							user.id,
+							HistoryWalletType.SPOT_LIMIT
 						);
 					} else {
 						await this.walletService.increase(
 							trx,
 							DEFAULT_CURRENCY,
 							currentCommand.totalPay,
-							user.id
+							user.id,
+							HistoryWalletType.SPOT_LIMIT
 						);
 					}
 

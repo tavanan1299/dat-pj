@@ -2,7 +2,7 @@ import { ICommand } from '@app/apis/command/command.interface';
 import { CommandEntity } from '@app/apis/command/entities/command.entity';
 import { CommandLogEntity } from '@app/apis/log/command-log/entities/command-log.entity';
 import { IWallet } from '@app/apis/wallet/wallet.interface';
-import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
+import { DEFAULT_CURRENCY, HistoryWalletType } from '@app/common/constants/constant';
 import { CommandType, CommonStatus } from '@app/common/enums/status.enum';
 import { Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -36,14 +36,16 @@ export class CancelMyCommandsHandler implements ICommandHandler<CancelMyCommands
 							trx,
 							command.coinName,
 							command.quantity,
-							userId
+							userId,
+							HistoryWalletType.SPOT_LIMIT
 						);
 					} else {
 						await this.walletService.increase(
 							trx,
 							DEFAULT_CURRENCY,
 							command.totalPay,
-							userId
+							userId,
+							HistoryWalletType.SPOT_LIMIT
 						);
 					}
 					await trx.getRepository(CommandEntity).delete(command.id);

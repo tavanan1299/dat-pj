@@ -1,7 +1,7 @@
 import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.entity';
 import { UserEntity } from '@app/apis/user/entities/user.entity';
+import { HistoryWalletType } from '@app/common/constants/constant';
 import { WalletStatus, WalletType } from '@app/common/enums/wallet.enum';
-import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { IMailService } from '@app/modules/mail';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -92,7 +92,7 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 				coinName: pendingWallet.coinName,
 				quantity: pendingWallet.quantity,
 				remainBalance: wallet?.quantity - pendingWallet.quantity,
-				type: WalletLogType.WITHDRAW
+				type: HistoryWalletType.WITHDRAW
 			});
 		});
 
@@ -130,7 +130,7 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 				coinName: pendingWallet.coinName,
 				quantity: pendingWallet.quantity,
 				remainBalance: wallet?.quantity + pendingWallet.quantity,
-				type: WalletLogType.DEPOSIT
+				type: HistoryWalletType.DEPOSIT
 			});
 		});
 

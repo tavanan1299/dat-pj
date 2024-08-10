@@ -1,5 +1,5 @@
 import { IWallet } from '@app/apis/wallet/wallet.interface';
-import { BINANCE_API, DEFAULT_CURRENCY } from '@app/common/constants/constant';
+import { BINANCE_API, DEFAULT_CURRENCY, HistoryWalletType } from '@app/common/constants/constant';
 import { FutureCommandOrderType, FutureCommandType } from '@app/common/enums/status.enum';
 import { coinName2USDT } from '@app/common/helpers/common.helper';
 import { BadRequestException, Logger } from '@nestjs/common';
@@ -62,7 +62,13 @@ export class CreateFutureCommandHandler implements ICommandHandler<CreateFutureC
 		}
 
 		await this.entityManager.transaction(async (trx) => {
-			await this.walletService.decrease(trx, DEFAULT_CURRENCY, minusQuantity, user.id);
+			await this.walletService.decrease(
+				trx,
+				DEFAULT_CURRENCY,
+				minusQuantity,
+				user.id,
+				HistoryWalletType.FUTURE
+			);
 
 			await trx.getRepository(FutureCommandEntity).save({
 				...data,

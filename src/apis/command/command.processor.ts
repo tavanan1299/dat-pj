@@ -1,4 +1,4 @@
-import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
+import { DEFAULT_CURRENCY, HistoryWalletType } from '@app/common/constants/constant';
 import {
 	CommandType,
 	CommonStatus,
@@ -219,7 +219,8 @@ export class CommandProcessor extends WorkerHost {
 					trx,
 					DEFAULT_CURRENCY,
 					command.totalPay,
-					command.userId
+					command.userId,
+					HistoryWalletType.SPOT_LIMIT
 				);
 
 				// add logs
@@ -249,7 +250,8 @@ export class CommandProcessor extends WorkerHost {
 					trx,
 					command.coinName,
 					command.quantity,
-					command.userId
+					command.userId,
+					HistoryWalletType.SPOT_LIMIT
 				);
 
 				await trx.getRepository(CommandEntity).delete(command.id);
@@ -290,14 +292,16 @@ export class CommandProcessor extends WorkerHost {
 						trx,
 						DEFAULT_CURRENCY,
 						Math.abs(PNLClosed),
-						command.userId
+						command.userId,
+						HistoryWalletType.FUTURE
 					);
 				} else {
 					await this.walletService.increase(
 						trx,
 						DEFAULT_CURRENCY,
 						PNLClosed,
-						command.userId
+						command.userId,
+						HistoryWalletType.FUTURE
 					);
 				}
 				await trx.getRepository(FutureCommandEntity).delete(command.id);
@@ -337,7 +341,13 @@ export class CommandProcessor extends WorkerHost {
 
 			await this.entityManager.transaction(async (trx) => {
 				const PNLClosed = command.quantity / command.leverage + profit;
-				await this.walletService.increase(trx, DEFAULT_CURRENCY, PNLClosed, command.userId);
+				await this.walletService.increase(
+					trx,
+					DEFAULT_CURRENCY,
+					PNLClosed,
+					command.userId,
+					HistoryWalletType.FUTURE
+				);
 
 				await trx.getRepository(FutureCommandEntity).delete(command.id);
 
@@ -382,14 +392,16 @@ export class CommandProcessor extends WorkerHost {
 						trx,
 						DEFAULT_CURRENCY,
 						Math.abs(PNLClosed),
-						command.userId
+						command.userId,
+						HistoryWalletType.FUTURE
 					);
 				} else {
 					await this.walletService.increase(
 						trx,
 						DEFAULT_CURRENCY,
 						PNLClosed,
-						command.userId
+						command.userId,
+						HistoryWalletType.FUTURE
 					);
 				}
 

@@ -1,12 +1,11 @@
-import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.entity';
 import { INotification } from '@app/apis/notification/notification.interface';
 import { Notification_Type } from '@app/apis/notification/types';
 import { RateEntity } from '@app/apis/stacking/entities/rate.entity';
 import { StackingEntity } from '@app/apis/stacking/entities/stacking.entity';
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
 import { IWallet } from '@app/apis/wallet/wallet.interface';
+import { HistoryWalletType } from '@app/common/constants/constant';
 import { StackingStatus } from '@app/common/enums/status.enum';
-import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { differenceInCalendarMonths } from 'date-fns';
@@ -57,18 +56,8 @@ export class CronService extends ICronService {
 						this.entityManager,
 						stacking.coinName,
 						profit,
-						stacking.userId
-					);
-
-					const walletLog = await WalletLogEntity.save(
-						WalletLogEntity.create({
-							userId: wallet.userId,
-							walletId: wallet.id,
-							coinName: wallet.coinName,
-							quantity: profit,
-							remainBalance: +wallet.quantity,
-							type: WalletLogType.STACKING
-						})
+						stacking.userId,
+						HistoryWalletType.STACKING
 					);
 
 					const DATA_NOTI: Notification_Type = {
@@ -80,7 +69,8 @@ export class CronService extends ICronService {
 
 					await this.notifService.sendNotification(DATA_NOTI, wallet.userId, {
 						body: 'Stacking is done',
-						...walletLog
+						...stacking,
+						status: StackingStatus.DONE
 					});
 
 					stacking.status = StackingStatus.DONE;

@@ -1,5 +1,6 @@
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
 import { IWallet } from '@app/apis/wallet/wallet.interface';
+import { HistoryWalletType } from '@app/common/constants/constant';
 import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectEntityManager } from '@nestjs/typeorm';
@@ -44,7 +45,13 @@ export class CreateVerifyUserHandler implements ICommandHandler<CreateStackingCo
 					);
 				}
 
-				await this.walletService.decrease(trx, data.coinName, data.quantity, user.id);
+				await this.walletService.decrease(
+					trx,
+					data.coinName,
+					data.quantity,
+					user.id,
+					HistoryWalletType.STACKING
+				);
 				await this.createStacking(trx, { ...data, userId: user.id });
 
 				return 'Create Stacking successfully';
