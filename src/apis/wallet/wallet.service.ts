@@ -1,4 +1,3 @@
-import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
@@ -22,7 +21,13 @@ export class WalletService extends IWallet {
 		super(walletRepo);
 	}
 
-	async decrease(trx: EntityManager, coinName: string, coinQuantity: number, userId: string) {
+	async decrease(
+		trx: EntityManager,
+		coinName: string,
+		coinQuantity: number,
+		userId: string,
+		logType: string
+	) {
 		let currentWallet = await trx.getRepository(WalletEntity).findOne({
 			where: {
 				coinName,
@@ -66,11 +71,17 @@ export class WalletService extends IWallet {
 			coinName: currentWallet.coinName,
 			quantity: coinQuantity,
 			remainBalance: +currentWallet.quantity - +coinQuantity,
-			type: WalletLogType.COMMAND_SELL
+			type: logType
 		});
 	}
 
-	async increase(trx: EntityManager, coinName: string, coinQuantity: number, userId: string) {
+	async increase(
+		trx: EntityManager,
+		coinName: string,
+		coinQuantity: number,
+		userId: string,
+		logType: string
+	) {
 		let currentWallet = await trx.getRepository(WalletEntity).findOne({
 			where: {
 				coinName,
@@ -110,7 +121,7 @@ export class WalletService extends IWallet {
 			coinName: currentWallet.coinName,
 			quantity: coinQuantity,
 			remainBalance: +currentWallet.quantity + +coinQuantity,
-			type: WalletLogType.COMMAND_BUY
+			type: logType
 		});
 	}
 }

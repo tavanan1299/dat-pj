@@ -1,5 +1,5 @@
 import { IWallet } from '@app/apis/wallet/wallet.interface';
-import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
+import { DEFAULT_CURRENCY, HistoryWalletType } from '@app/common/constants/constant';
 import { CommandType } from '@app/common/enums/status.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -32,7 +32,13 @@ export class CreateCommandHandler implements ICommandHandler<CreateCommand> {
 					lossStopPrice: undefined
 				});
 
-				await this.walletService.decrease(trx, DEFAULT_CURRENCY, data.totalPay, user.id);
+				await this.walletService.decrease(
+					trx,
+					DEFAULT_CURRENCY,
+					data.totalPay,
+					user.id,
+					HistoryWalletType.SPOT_LIMIT
+				);
 			} else {
 				if (!data.lossStopPrice) {
 					throw new BadRequestException('Field lossStopPrice is required');
@@ -40,7 +46,13 @@ export class CreateCommandHandler implements ICommandHandler<CreateCommand> {
 
 				await trx.getRepository(CommandEntity).save({ ...data, userId: user.id });
 
-				await this.walletService.decrease(trx, data.coinName, data.quantity, user.id);
+				await this.walletService.decrease(
+					trx,
+					data.coinName,
+					data.quantity,
+					user.id,
+					HistoryWalletType.SPOT_LIMIT
+				);
 			}
 
 			this.eventEmitter.emit('command.created', data.coinName);

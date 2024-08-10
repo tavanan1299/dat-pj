@@ -35,3 +35,12 @@ export const NotificationMessage = {
 	EXECUTED_COMMAND: 'Executed command',
 	STACKING_DONE: 'Stacking done'
 } as const;
+
+export const HistoryWalletType = {
+	DEPOSIT: 'deposit',
+	WITHDRAW: ' withdraw',
+	SPOT_MARKET: 'spot_market',
+	SPOT_LIMIT: 'spot_limit',
+	FUTURE: 'future',
+	STACKING: 'stacking'
+} as const;

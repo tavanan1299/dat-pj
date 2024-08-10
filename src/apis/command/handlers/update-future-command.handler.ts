@@ -1,5 +1,5 @@
 import { IWallet } from '@app/apis/wallet/wallet.interface';
-import { BINANCE_API, DEFAULT_CURRENCY } from '@app/common/constants/constant';
+import { BINANCE_API, DEFAULT_CURRENCY, HistoryWalletType } from '@app/common/constants/constant';
 import { ROLES } from '@app/common/constants/role.constant';
 import { FutureCommandOrderType } from '@app/common/enums/status.enum';
 import { coinName2USDT } from '@app/common/helpers/common.helper';
@@ -88,14 +88,16 @@ export class UpdateFutureCommandHandler implements ICommandHandler<UpdateFutureC
 							trx,
 							DEFAULT_CURRENCY,
 							updatedPrice - rollbackQuantity,
-							user.id
+							user.id,
+							HistoryWalletType.FUTURE
 						);
 					} else {
 						await this.walletService.increase(
 							trx,
 							DEFAULT_CURRENCY,
 							rollbackQuantity - updatedPrice,
-							user.id
+							user.id,
+							HistoryWalletType.FUTURE
 						);
 					}
 				}

@@ -1,10 +1,8 @@
-import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.entity';
 import { UserEntity } from '@app/apis/user/entities/user.entity';
 import { WalletEntity } from '@app/apis/wallet/entities/wallet.entity';
 import { IWallet } from '@app/apis/wallet/wallet.interface';
-import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
+import { DEFAULT_CURRENCY, HistoryWalletType } from '@app/common/constants/constant';
 import { CommandType, CommonStatus, MarketLogType } from '@app/common/enums/status.enum';
-import { WalletLogType } from '@app/common/enums/walletLog.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectEntityManager } from '@nestjs/typeorm';
@@ -56,14 +54,16 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 							trx,
 							DEFAULT_CURRENCY,
 							data.totalPay,
-							currentUser.id
+							currentUser.id,
+							HistoryWalletType.SPOT_MARKET
 						);
 
 						await this.walletService.increase(
 							trx,
 							data.coinName,
 							data.quantity,
-							currentUser.id
+							currentUser.id,
+							HistoryWalletType.SPOT_MARKET
 						);
 
 						await trx.getRepository(MarketLogEntity).save(
@@ -75,17 +75,6 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 								userId: currentUser.id,
 								type: MarketLogType.MARKET_BUY,
 								status: CommonStatus.SUCCESS
-							})
-						);
-
-						await trx.getRepository(WalletLogEntity).save(
-							WalletLogEntity.create({
-								coinName: data.coinName,
-								quantity: data.quantity,
-								remainBalance: +currentWallet?.quantity + +data.quantity,
-								userId: currentUser.id,
-								walletId: currentWallet.id,
-								type: WalletLogType.MARKET_BUY
 							})
 						);
 					});
@@ -101,14 +90,16 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 							trx,
 							data.coinName,
 							data.quantity,
-							currentUser.id
+							currentUser.id,
+							HistoryWalletType.SPOT_MARKET
 						);
 
 						await this.walletService.increase(
 							trx,
 							DEFAULT_CURRENCY,
 							data.totalPay,
-							currentUser.id
+							currentUser.id,
+							HistoryWalletType.SPOT_MARKET
 						);
 
 						await trx.getRepository(MarketLogEntity).save(
@@ -122,17 +113,6 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 								status: CommonStatus.SUCCESS
 							})
 						);
-
-						await trx.getRepository(WalletLogEntity).save(
-							WalletLogEntity.create({
-								coinName: data.coinName,
-								quantity: data.quantity,
-								remainBalance: +currentWallet?.quantity - +data.quantity,
-								userId: currentUser.id,
-								walletId: currentWallet.id,
-								type: WalletLogType.MARKET_SELL
-							})
-						);
 					});
 
 					return 'Create successfully';
@@ -143,22 +123,5 @@ export class CreateMarketLogHandler implements ICommandHandler<CreateMarketLogCo
 			// console.log(error);
 			throw error;
 		}
-	}
-
-	private async updateWallet(
-		entityManager: EntityManager,
-		userId: string,
-		coinName: string,
-		quantity: number
-	) {
-		await entityManager
-			.createQueryBuilder()
-			.update(WalletEntity)
-			.set({ quantity: quantity })
-			.where({
-				userId: userId,
-				coinName: coinName
-			})
-			.execute();
 	}
 }

@@ -1,4 +1,4 @@
-import { DEFAULT_CURRENCY } from '@app/common/constants/constant';
+import { DEFAULT_CURRENCY, HistoryWalletType } from '@app/common/constants/constant';
 import { CommonStatus, FutureCommandOrderType } from '@app/common/enums/status.enum';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -37,10 +37,17 @@ export class FutureCommandService extends IFutureCommand {
 				trx,
 				DEFAULT_CURRENCY,
 				Math.abs(PNLClosed),
-				command.userId
+				command.userId,
+				HistoryWalletType.FUTURE
 			);
 		} else {
-			await this.walletService.increase(trx, DEFAULT_CURRENCY, PNLClosed, command.userId);
+			await this.walletService.increase(
+				trx,
+				DEFAULT_CURRENCY,
+				PNLClosed,
+				command.userId,
+				HistoryWalletType.FUTURE
+			);
 		}
 
 		// add logs
