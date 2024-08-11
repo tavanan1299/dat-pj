@@ -70,7 +70,8 @@ export class CronService extends ICronService {
 					await this.notifService.sendNotification(DATA_NOTI, wallet.userId, {
 						body: 'Stacking is done',
 						...stacking,
-						status: StackingStatus.DONE
+						status: StackingStatus.DONE,
+						action: 'stacking'
 					});
 
 					stacking.status = StackingStatus.DONE;

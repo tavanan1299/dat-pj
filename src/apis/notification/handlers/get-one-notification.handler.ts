@@ -23,7 +23,7 @@ export class GetOneNotificationByIdHandler
 
 		if (!notification) throw new NotFoundException('Notification does not exist');
 
-		await NotificationReceives.update(notification?.id, { isRead: true });
+		await NotificationReceives.update(notification?.id, { isRead: true, readDate: new Date() });
 
 		return notification;
 	}

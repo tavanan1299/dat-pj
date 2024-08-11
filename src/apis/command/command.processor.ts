@@ -138,7 +138,8 @@ export class CommandProcessor extends WorkerHost {
 		for (const futureCommand of [...longLiquidations80, ...shortLiquidations80]) {
 			await this.notifService.sendNotification(this.DATA_NOTI, futureCommand.userId, {
 				body: `Your future order has been reached 80 percent of liquidation`,
-				...futureCommand
+				...futureCommand,
+				action: 'future'
 			});
 		}
 
@@ -233,7 +234,8 @@ export class CommandProcessor extends WorkerHost {
 
 				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
 					body: `Your limit order has been reached the ${isLostStop ? 'LS' : 'TP'}`,
-					...commandLog
+					...commandLog,
+					action: 'limit'
 				});
 
 				return;
@@ -266,7 +268,8 @@ export class CommandProcessor extends WorkerHost {
 
 				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
 					body: `Your limit order has been bought`,
-					...commandLog
+					...commandLog,
+					action: 'limit'
 				});
 			});
 		}
@@ -319,7 +322,8 @@ export class CommandProcessor extends WorkerHost {
 
 				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
 					body: 'Your future order has been liquidated',
-					...futureCommandLog
+					...futureCommandLog,
+					action: 'future'
 				});
 				return;
 			});
@@ -364,7 +368,8 @@ export class CommandProcessor extends WorkerHost {
 
 				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
 					body: 'Your future order has been reached the TP',
-					...futureCommandLog
+					...futureCommandLog,
+					action: 'future'
 				});
 
 				return;
@@ -420,7 +425,8 @@ export class CommandProcessor extends WorkerHost {
 
 				await this.notifService.sendNotification(this.DATA_NOTI, command.userId, {
 					body: 'Your future order has been reached the LS',
-					...futureCommandLog
+					...futureCommandLog,
+					action: 'future'
 				});
 
 				return;

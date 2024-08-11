@@ -33,7 +33,10 @@ export const NotificationMessage = {
 	BALANCE_FLUCTUATIONS: 'Balance fluctuations',
 	MESSAGE_ADMIN: 'Message from admin',
 	EXECUTED_COMMAND: 'Executed command',
-	STACKING_DONE: 'Stacking done'
+	STACKING_DONE: 'Stacking done',
+	DEPOSIT_SUCCESS: 'Deposit successful',
+	WITHDRAW_SUCCESS: 'Withdraw successful',
+	KYC: 'KYC'
 } as const;
 
 export const HistoryWalletType = {

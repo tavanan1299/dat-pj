@@ -1,6 +1,8 @@
 import { WalletLogEntity } from '@app/apis/log/wallet-log/entities/wallet-log.entity';
+import { INotification } from '@app/apis/notification/notification.interface';
+import { Notification_Type } from '@app/apis/notification/types';
 import { UserEntity } from '@app/apis/user/entities/user.entity';
-import { HistoryWalletType } from '@app/common/constants/constant';
+import { HistoryWalletType, NotificationMessage } from '@app/common/constants/constant';
 import { WalletStatus, WalletType } from '@app/common/enums/wallet.enum';
 import { IMailService } from '@app/modules/mail';
 import { BadRequestException, Logger } from '@nestjs/common';
@@ -22,7 +24,8 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 		@InjectEntityManager()
 		private readonly entityManager: EntityManager,
 		private readonly mailService: IMailService,
-		private configService: ConfigService
+		private configService: ConfigService,
+		private readonly notifService: INotification
 	) {}
 	async execute(command: ApprovePendingWalletCommand) {
 		try {
@@ -67,7 +70,7 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 
 	private async withdrawWallet(wallet: WalletEntity, pendingWallet: PendingWalletEntity) {
 		if (wallet && wallet?.quantity < pendingWallet.quantity) {
-			throw new BadRequestException('Your wallet is not enough');
+			throw new BadRequestException("User's wallet is not enough");
 		}
 
 		const currentUser = await UserEntity.findOne({
@@ -93,17 +96,34 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 				quantity: pendingWallet.quantity,
 				remainBalance: wallet?.quantity - pendingWallet.quantity,
 				type: HistoryWalletType.WITHDRAW,
-				desc: 'increase'
+				desc: 'decrease'
 			});
 		});
 
-		this.mailService.sendTransfer({
+		const notifData = {
 			coinName: pendingWallet.coinName,
-			to: this.configService.get('MAIL_DEFAULT')!,
 			quantity: pendingWallet.quantity,
 			type: WalletType.WITHDRAW,
 			userId: pendingWallet.userId,
 			email: currentUser!.email
+		};
+
+		this.mailService.sendTransfer({
+			...notifData,
+			to: this.configService.get('MAIL_DEFAULT')!
+		});
+
+		const DATA_NOTI: Notification_Type = {
+			message: NotificationMessage.WITHDRAW_SUCCESS,
+			entity: 'notification',
+			entityKind: 'create',
+			notiType: 'announcement'
+		};
+
+		await this.notifService.sendNotification(DATA_NOTI, pendingWallet.userId, {
+			body: `Withdraw successfully`,
+			...notifData,
+			action: 'withdraw'
 		});
 
 		return 'Withdraw success';
@@ -132,17 +152,34 @@ export class ApprovePendingWalletHandler implements ICommandHandler<ApprovePendi
 				quantity: pendingWallet.quantity,
 				remainBalance: wallet?.quantity + pendingWallet.quantity,
 				type: HistoryWalletType.DEPOSIT,
-				desc: 'decrease'
+				desc: 'increase'
 			});
 		});
 
-		this.mailService.sendTransfer({
+		const notifData = {
 			coinName: pendingWallet.coinName,
-			to: this.configService.get('MAIL_DEFAULT')!,
 			quantity: pendingWallet.quantity,
-			type: WalletType.DEPOSIT,
+			type: WalletType.WITHDRAW,
 			userId: pendingWallet.userId,
 			email: currentUser!.email
+		};
+
+		this.mailService.sendTransfer({
+			...notifData,
+			to: this.configService.get('MAIL_DEFAULT')!
+		});
+
+		const DATA_NOTI: Notification_Type = {
+			message: NotificationMessage.DEPOSIT_SUCCESS,
+			entity: 'notification',
+			entityKind: 'create',
+			notiType: 'announcement'
+		};
+
+		await this.notifService.sendNotification(DATA_NOTI, pendingWallet.userId, {
+			body: `Deposit successfully`,
+			...notifData,
+			action: 'deposit'
 		});
 
 		return 'Deposit success';
