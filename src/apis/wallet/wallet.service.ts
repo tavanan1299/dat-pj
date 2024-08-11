@@ -66,7 +66,8 @@ export class WalletService extends IWallet {
 			body: 'You have had an amount deducted from your wallet',
 			coinName,
 			amount: coinQuantity,
-			remainBalance
+			remainBalance,
+			action: 'decrease'
 		});
 
 		await trx.getRepository(WalletLogEntity).save({
@@ -117,7 +118,8 @@ export class WalletService extends IWallet {
 			body: 'You have received an amount of coins from your wallet',
 			coinName,
 			amount: coinQuantity,
-			remainBalance: +currentWallet.quantity + +coinQuantity
+			remainBalance: +currentWallet.quantity + +coinQuantity,
+			action: 'increase'
 		});
 
 		await trx.getRepository(WalletLogEntity).save({

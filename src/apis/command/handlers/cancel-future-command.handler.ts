@@ -35,52 +35,64 @@ export class CancelFutureCommandHandler implements ICommandHandler<CancelFutureC
 					throw new BadRequestException('Command not found');
 				}
 
-				if (currentCommand.userId === user.id || user.role.name === ROLES.ADMIN) {
-					const PNLClosed =
-						currentCommand.quantity / currentCommand.leverage + data.PNLClosed;
+				const {
+					id,
+					createdAt,
+					updatedAt,
+					deletedAt,
+					lessThanEntryPrice,
+					isEntry,
+					...rest
+				} = currentCommand;
 
-					if (PNLClosed < 0) {
-						await this.walletService.decrease(
-							trx,
-							DEFAULT_CURRENCY,
-							Math.abs(PNLClosed),
-							currentCommand.userId,
-							HistoryWalletType.FUTURE
-						);
-					} else {
-						await this.walletService.increase(
-							trx,
-							DEFAULT_CURRENCY,
+				if (currentCommand.userId === user.id || user.role.name === ROLES.ADMIN) {
+					if (currentCommand.isEntry) {
+						const PNLClosed =
+							currentCommand.quantity / currentCommand.leverage + data.PNLClosed;
+
+						if (PNLClosed < 0) {
+							await this.walletService.decrease(
+								trx,
+								DEFAULT_CURRENCY,
+								Math.abs(PNLClosed),
+								currentCommand.userId,
+								HistoryWalletType.FUTURE
+							);
+						} else {
+							await this.walletService.increase(
+								trx,
+								DEFAULT_CURRENCY,
+								PNLClosed,
+								currentCommand.userId,
+								HistoryWalletType.FUTURE
+							);
+						}
+
+						await trx.getRepository(FutureCommandEntity).remove(currentCommand);
+
+						// add logs
+						await trx.getRepository(FutureCommandLogEntity).save({
+							...rest,
+							status: CommonStatus.SUCCESS,
+							desc: 'closed',
 							PNLClosed,
-							currentCommand.userId,
-							HistoryWalletType.FUTURE
-						);
+							closedVolume: currentCommand.entryPrice * currentCommand.leverage,
+							closingPrice: data.closingPrice,
+							closedAt: new Date()
+						});
 					}
 
-					await trx.getRepository(FutureCommandEntity).remove(currentCommand);
-
-					const {
-						id,
-						createdAt,
-						updatedAt,
-						deletedAt,
-						lessThanEntryPrice,
-						isEntry,
-						...rest
-					} = currentCommand;
-
-					// add logs
 					await trx.getRepository(FutureCommandLogEntity).save({
 						...rest,
 						status: CommonStatus.SUCCESS,
-						desc: 'closed',
-						PNLClosed,
+						desc: 'cancelled',
+						PNLClosed: 0,
 						closedVolume: currentCommand.entryPrice * currentCommand.leverage,
 						closingPrice: data.closingPrice,
 						closedAt: new Date()
 					});
 
-					return 'Cancel Command successfully';
+					return 'Cancel future command successfully';
 				}
 
 				throw new BadRequestException('Access denied');

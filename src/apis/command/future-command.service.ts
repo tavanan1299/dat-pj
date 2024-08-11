@@ -23,6 +23,7 @@ export class FutureCommandService extends IFutureCommand {
 	async handleFutureCommand(trx: EntityManager, command: FutureCommandEntity, price: number) {
 		const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 			command;
+
 		const profit: number = this.calcProfit(
 			command.entryPrice,
 			price,

@@ -1,7 +1,9 @@
 import { ICommand } from '@app/apis/command/command.interface';
 import { FutureCommandEntity } from '@app/apis/command/entities/future-command.entity';
 import { IFutureCommand } from '@app/apis/command/future-command.interface';
+import { FutureCommandLogEntity } from '@app/apis/log/future-command-log/entities/future-command-log.entity';
 import { BINANCE_API } from '@app/common/constants/constant';
+import { CommonStatus } from '@app/common/enums/status.enum';
 import { coinName2USDT } from '@app/common/helpers/common.helper';
 import { Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -35,16 +37,38 @@ export class CancelMyFutureCommandsHandler implements ICommandHandler<CancelMyFu
 						`${BINANCE_API}${coinName2USDT(command.coinName)}`
 					);
 
-					await this.futureCommandService.handleFutureCommand(
-						trx,
-						command,
-						binanceCoin.data.price
-					);
+					if (command.isEntry) {
+						await this.futureCommandService.handleFutureCommand(
+							trx,
+							command,
+							binanceCoin.data.price
+						);
+					} else {
+						const {
+							id,
+							createdAt,
+							updatedAt,
+							deletedAt,
+							lessThanEntryPrice,
+							isEntry,
+							...rest
+						} = command;
+
+						await trx.getRepository(FutureCommandLogEntity).save({
+							...rest,
+							status: CommonStatus.SUCCESS,
+							desc: 'cancelled',
+							PNLClosed: 0,
+							closedVolume: command.entryPrice * command.leverage,
+							closingPrice: binanceCoin.data.price,
+							closedAt: new Date()
+						});
+					}
 
 					await trx.getRepository(FutureCommandEntity).delete(command.id);
 				}
 
-				return 'Cancel my command successfully';
+				return 'Cancel my future command successfully';
 			});
 		} catch (error) {
 			throw error;
