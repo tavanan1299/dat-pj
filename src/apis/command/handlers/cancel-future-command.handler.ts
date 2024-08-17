@@ -1,6 +1,5 @@
 import { FutureCommandLogEntity } from '@app/apis/log/future-command-log/entities/future-command-log.entity';
 import { IWallet } from '@app/apis/wallet/wallet.interface';
-import { DEFAULT_CURRENCY, HistoryWalletType } from '@app/common/constants/constant';
 import { ROLES } from '@app/common/constants/role.constant';
 import { CommonStatus } from '@app/common/enums/status.enum';
 import { BadRequestException, Logger } from '@nestjs/common';
@@ -47,39 +46,14 @@ export class CancelFutureCommandHandler implements ICommandHandler<CancelFutureC
 
 				if (currentCommand.userId === user.id || user.role.name === ROLES.ADMIN) {
 					if (currentCommand.isEntry) {
-						const PNLClosed =
-							currentCommand.quantity / currentCommand.leverage + data.PNLClosed;
-
-						if (PNLClosed < 0) {
-							await this.walletService.decrease(
-								trx,
-								DEFAULT_CURRENCY,
-								Math.abs(PNLClosed),
-								currentCommand.userId,
-								HistoryWalletType.FUTURE
-							);
-						} else {
-							await this.walletService.increase(
-								trx,
-								DEFAULT_CURRENCY,
-								PNLClosed,
-								currentCommand.userId,
-								HistoryWalletType.FUTURE
-							);
-						}
+						await this.futureCommandService.handleFutureCommand(
+							trx,
+							currentCommand,
+							data.closingPrice
+						);
 
 						await trx.getRepository(FutureCommandEntity).remove(currentCommand);
-
-						// add logs
-						await trx.getRepository(FutureCommandLogEntity).save({
-							...rest,
-							status: CommonStatus.SUCCESS,
-							desc: 'closed',
-							PNLClosed,
-							closedVolume: currentCommand.entryPrice * currentCommand.leverage,
-							closingPrice: data.closingPrice,
-							closedAt: new Date()
-						});
+						return 'Cancel future command successfully';
 					}
 
 					await trx.getRepository(FutureCommandLogEntity).save({

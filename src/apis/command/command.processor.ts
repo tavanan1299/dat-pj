@@ -281,32 +281,8 @@ export class CommandProcessor extends WorkerHost {
 		for (const command of data) {
 			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 				command;
-			const profit = this.futureCommandService.calcProfit(
-				command.entryPrice,
-				command.liquidationPrice,
-				command.quantity,
-				command.orderType === FutureCommandOrderType.LONG ? true : false
-			);
 
 			await this.entityManager.transaction(async (trx) => {
-				const PNLClosed = command.quantity / command.leverage + profit;
-				if (PNLClosed < 0) {
-					await this.walletService.decrease(
-						trx,
-						DEFAULT_CURRENCY,
-						Math.abs(PNLClosed),
-						command.userId,
-						HistoryWalletType.FUTURE
-					);
-				} else {
-					await this.walletService.increase(
-						trx,
-						DEFAULT_CURRENCY,
-						PNLClosed,
-						command.userId,
-						HistoryWalletType.FUTURE
-					);
-				}
 				await trx.getRepository(FutureCommandEntity).delete(command.id);
 
 				// add logs
@@ -336,15 +312,18 @@ export class CommandProcessor extends WorkerHost {
 		for (const command of data) {
 			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 				command;
-			const profit = this.futureCommandService.calcProfit(
+
+			const margin = (command.entryPrice / command.leverage) * command.quantity;
+			const profit = this.futureCommandService.calculatePNL(
+				command.orderType === FutureCommandOrderType.LONG,
 				command.entryPrice,
-				command.expectPrice,
-				command.quantity,
-				command.orderType === FutureCommandOrderType.LONG ? true : false
+				+price,
+				margin,
+				command.leverage
 			);
 
 			await this.entityManager.transaction(async (trx) => {
-				const PNLClosed = command.quantity / command.leverage + profit;
+				const PNLClosed = command.quantity + profit;
 				await this.walletService.increase(
 					trx,
 					DEFAULT_CURRENCY,
@@ -383,32 +362,24 @@ export class CommandProcessor extends WorkerHost {
 		for (const command of data) {
 			const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 				command;
-			const profit = this.futureCommandService.calcProfit(
+			const margin = (command.entryPrice / command.leverage) * command.quantity;
+			const profit = this.futureCommandService.calculatePNL(
+				command.orderType === FutureCommandOrderType.LONG,
 				command.entryPrice,
-				command.lossStopPrice,
-				command.quantity,
-				command.orderType === FutureCommandOrderType.LONG ? true : false
+				+price,
+				margin,
+				command.leverage
 			);
 
 			await this.entityManager.transaction(async (trx) => {
-				const PNLClosed = command.quantity / command.leverage + profit;
-				if (PNLClosed < 0) {
-					await this.walletService.decrease(
-						trx,
-						DEFAULT_CURRENCY,
-						Math.abs(PNLClosed),
-						command.userId,
-						HistoryWalletType.FUTURE
-					);
-				} else {
-					await this.walletService.increase(
-						trx,
-						DEFAULT_CURRENCY,
-						PNLClosed,
-						command.userId,
-						HistoryWalletType.FUTURE
-					);
-				}
+				const PNLClosed = command.quantity + profit;
+				await this.walletService.increase(
+					trx,
+					DEFAULT_CURRENCY,
+					PNLClosed,
+					command.userId,
+					HistoryWalletType.FUTURE
+				);
 
 				await trx.getRepository(FutureCommandEntity).delete(command.id);
 

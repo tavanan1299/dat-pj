@@ -24,38 +24,31 @@ export class FutureCommandService extends IFutureCommand {
 		const { id, createdAt, updatedAt, deletedAt, lessThanEntryPrice, isEntry, ...rest } =
 			command;
 
-		const profit: number = this.calcProfit(
+		const margin = (command.entryPrice / command.leverage) * command.quantity;
+
+		const profit = this.calculatePNL(
+			command.orderType === FutureCommandOrderType.LONG,
 			command.entryPrice,
 			price,
-			command.quantity,
-			command.orderType === FutureCommandOrderType.LONG ? true : false
+			margin,
+			command.leverage
 		);
 
-		const PNLClosed = command.quantity / command.leverage + profit;
+		const PNLClosed = command.quantity + profit;
 
-		if (PNLClosed < 0) {
-			await this.walletService.decrease(
-				trx,
-				DEFAULT_CURRENCY,
-				Math.abs(PNLClosed),
-				command.userId,
-				HistoryWalletType.FUTURE
-			);
-		} else {
-			await this.walletService.increase(
-				trx,
-				DEFAULT_CURRENCY,
-				PNLClosed,
-				command.userId,
-				HistoryWalletType.FUTURE
-			);
-		}
+		await this.walletService.increase(
+			trx,
+			DEFAULT_CURRENCY,
+			PNLClosed,
+			command.userId,
+			HistoryWalletType.FUTURE
+		);
 
 		// add logs
 		await trx.getRepository(FutureCommandLogEntity).save({
 			...rest,
 			status: CommonStatus.SUCCESS,
-			desc: 'Cancel',
+			desc: 'Closed',
 			PNLClosed,
 			closedVolume: command.entryPrice * command.leverage,
 			closingPrice: price,
@@ -70,4 +63,29 @@ export class FutureCommandService extends IFutureCommand {
 
 		return (1 / entryPrice - 1 / outPrice) * (quantity * -1) * outPrice;
 	}
+
+	calculatePNL(
+		isLong = true,
+		entryPrice: number,
+		currentPrice: number,
+		margin: number,
+		leverage: number
+	) {
+		const positionSize = (margin * leverage) / entryPrice;
+		if (isLong) {
+			return (currentPrice - entryPrice) * positionSize;
+		} else {
+			return (entryPrice - currentPrice) * positionSize;
+		}
+	}
 }
+
+// double calculatePNL(bool isLong, double entryPrice, double currentPrice,
+// 	double margin, double leverage) {
+//   double positionSize = (margin * leverage) / entryPrice;
+//   if (isLong) {
+// 	return (currentPrice - entryPrice) * positionSize;
+//   } else {
+// 	return (entryPrice - currentPrice) * positionSize;
+//   }
+// }

@@ -34,12 +34,14 @@ export class CreateFutureCommandHandler implements ICommandHandler<CreateFutureC
 			lessThanEntryPrice = binanceCoin.data.price < data.entryPrice;
 		}
 
-		const minusQuantity = +data.quantity / +data.leverage;
+		const minusQuantity = data.quantity;
 		let liquidationPrice = 0;
 		let liquidationPrice80 = 0;
+		const margin = (data.entryPrice / data.leverage) * data.quantity;
 
 		if (data.orderType === FutureCommandOrderType.LONG) {
-			liquidationPrice = data.entryPrice * (1 - 1 / data.leverage);
+			liquidationPrice =
+				data.entryPrice - (data.quantity * data.entryPrice) / (margin * data.leverage);
 			liquidationPrice80 = liquidationPrice + (data.entryPrice - liquidationPrice) * 0.2;
 
 			if (data.expectPrice && data.expectPrice < data.entryPrice) {
@@ -51,7 +53,8 @@ export class CreateFutureCommandHandler implements ICommandHandler<CreateFutureC
 		}
 
 		if (data.orderType === FutureCommandOrderType.SHORT) {
-			liquidationPrice = data.entryPrice * (1 + 1 / data.leverage);
+			liquidationPrice =
+				(data.quantity * data.entryPrice) / (margin * data.leverage) + data.entryPrice;
 			liquidationPrice80 = liquidationPrice - (liquidationPrice - data.entryPrice) * 0.2;
 			if (data.expectPrice && data.expectPrice > data.entryPrice) {
 				throw new BadRequestException('expectPrice must be smaller than entryPrice');
