@@ -11,6 +11,9 @@ export class PendingWalletEntity extends BaseEntity {
 	@Column()
 	quantity!: number;
 
+	@Column()
+	proofURL!: string;
+
 	@Column({ nullable: true })
 	userId!: string;
 
