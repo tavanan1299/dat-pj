@@ -22,4 +22,9 @@ export class UpdateWalletDto {
 	@IsNotEmpty()
 	@IsEnum(WalletType)
 	type!: WalletType;
+
+	@ApiProperty({ description: 'Picture of proof' })
+	@IsString()
+	@IsNotEmpty()
+	proofURL!: string;
 }
