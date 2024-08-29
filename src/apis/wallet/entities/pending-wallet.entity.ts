@@ -8,7 +8,7 @@ export class PendingWalletEntity extends BaseEntity {
 	@Column()
 	coinName!: string;
 
-	@Column()
+	@Column({ type: 'float' })
 	quantity!: number;
 
 	@Column()
