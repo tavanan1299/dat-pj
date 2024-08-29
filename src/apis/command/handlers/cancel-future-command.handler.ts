@@ -66,6 +66,7 @@ export class CancelFutureCommandHandler implements ICommandHandler<CancelFutureC
 						closedAt: new Date()
 					});
 
+					await trx.getRepository(FutureCommandEntity).remove(currentCommand);
 					return 'Cancel future command successfully';
 				}
 
