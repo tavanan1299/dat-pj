@@ -13,7 +13,13 @@ export class GetOneUserByIdHandler implements ICommandHandler<GetOneUserByIdComm
 		this.logger.log(command);
 		const { id } = command;
 		return this.userService.getOneByIdOrFail(id, {
-			relations: ['profile', 'verify']
+			relations: ['profile', 'verify', 'children'],
+			select: {
+				children: {
+					id: true,
+					email: true
+				}
+			}
 		});
 	}
 }
