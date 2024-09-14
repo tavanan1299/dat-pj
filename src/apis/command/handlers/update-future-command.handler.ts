@@ -27,10 +27,6 @@ export class UpdateFutureCommandHandler implements ICommandHandler<UpdateFutureC
 			.getRepository(FutureCommandEntity)
 			.findOneOrFail({ where: { id: commandId } });
 
-		if (!futureCommand.isEntry) {
-			throw new BadRequestException('This command is not entry, please cancel it');
-		}
-
 		if (futureCommand.userId === user.id || user.role.name === ROLES.ADMIN) {
 			if (futureCommand.orderType === FutureCommandOrderType.LONG) {
 				if (

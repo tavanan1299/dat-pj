@@ -17,6 +17,12 @@ export class PendingWalletEntity extends BaseEntity {
 	@Column({ nullable: true })
 	userId!: string;
 
+	@Column({ nullable: true })
+	wallet_address!: string;
+
+	@Column({ nullable: true })
+	network!: string;
+
 	@Column({ type: 'enum', enum: WalletStatus, default: WalletStatus.PENDING })
 	status!: WalletStatus;
 

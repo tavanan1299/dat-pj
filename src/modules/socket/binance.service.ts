@@ -56,7 +56,7 @@ export class BinanceService {
 		);
 
 		this.coins = data.length
-			? data.map((item) => `${item.name}usdt@markPrice`)
+			? data.map((item) => `${item.name.toString().toLowerCase()}usdt@markPrice`)
 			: ['btcusdt@markPrice'];
 		return;
 	}
