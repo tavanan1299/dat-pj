@@ -47,9 +47,7 @@ export class RegisterUserHandler implements ICommandHandler<RegisterCommand> {
 					userId: userInvite?.id
 				});
 
-				throw new BadRequestException(
-					'Please check your email to verify your registration'
-				);
+				return 'Please check your email to verify your registration';
 			}
 			throw new BadRequestException('User already exists');
 		}
