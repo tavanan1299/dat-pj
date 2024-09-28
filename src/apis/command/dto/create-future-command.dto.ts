@@ -1,6 +1,6 @@
 import { FutureCommandOrderType, FutureCommandType } from '@app/common/enums/status.enum';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateFutureCommandDto {
 	@ApiProperty({ description: 'Coin name' })
@@ -10,21 +10,25 @@ export class CreateFutureCommandDto {
 
 	@ApiProperty({ description: 'Quantity' })
 	@IsNumber()
+	@Min(0)
 	@IsNotEmpty()
 	quantity!: number;
 
 	@ApiProperty({ description: 'Entry price' })
 	@IsNumber()
+	@Min(0)
 	@IsNotEmpty()
 	entryPrice!: number;
 
 	@ApiProperty({ description: 'Expect price' })
 	@IsNumber()
+	@Min(0)
 	@IsOptional()
 	expectPrice?: number;
 
 	@ApiProperty({ description: 'Lost stop price' })
 	@IsNumber()
+	@Min(0)
 	@IsOptional()
 	lossStopPrice?: number;
 
@@ -46,6 +50,7 @@ export class CreateFutureCommandDto {
 
 	@ApiProperty({ description: 'Leverage' })
 	@IsNumber()
+	@Min(0)
 	@IsNotEmpty()
 	leverage!: number;
 }
