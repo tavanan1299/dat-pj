@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
 
 export class CreateStackingDto {
 	@ApiProperty({ description: 'Coin name' })
@@ -9,6 +9,7 @@ export class CreateStackingDto {
 
 	@ApiProperty({ description: 'Month' })
 	@IsNumber()
+	@Min(1)
 	@IsNotEmpty()
 	monthSaving!: number;
 
