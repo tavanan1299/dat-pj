@@ -28,6 +28,7 @@ jobs:
                       cd dat-pj
                       pm2 stop main
                       git pull origin production
+                      export NODE_OPTIONS="--max-old-space-size=8192"
                       npm install
                       npm run build
                       TZ=UTC pm2 start dist/src/main.js --env .env

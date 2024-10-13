@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { verify } from 'argon2';
 import { Repository } from 'typeorm';
@@ -16,14 +16,14 @@ export class UserService extends IUserService {
 	async validateUserByEmailPassword(email: string, password: string): Promise<UserEntity> {
 		const user = await this.getOne({ where: { email } });
 		if (!user) {
-			throw new UnauthorizedException('User Not Found');
+			throw new BadRequestException('User Not Found');
 		}
 		if (user.isActive === false) {
-			throw new UnauthorizedException('User has not been activated yet');
+			throw new BadRequestException('User has not been activated yet');
 		}
 		const comparePassword = await verify(user.password, password);
 		if (!comparePassword) {
-			throw new UnauthorizedException('Email or password incorrect');
+			throw new BadRequestException('Email or password incorrect');
 		}
 		return user;
 	}
